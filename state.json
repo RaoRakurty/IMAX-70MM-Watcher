@@ -1,7 +1,9 @@
 {
   "movies": {
     "104867": {
+      "date_probe_cursor": 0,
       "initialized": true,
+      "seat_poll_cursor": 8,
       "seat_snapshots": {
         "641806": [],
         "641827": [],
@@ -571,13 +573,26 @@
           "iso": "2026-09-16T23:00:00",
           "theater_id": "207"
         }
+      },
+      "verified_inventory": {
+        "641832": true,
+        "641833": true,
+        "641834": true,
+        "641835": true,
+        "641836": true,
+        "641837": true,
+        "641838": true,
+        "641839": true
       }
     },
     "109913": {
+      "date_probe_cursor": 0,
       "initialized": true,
+      "seat_poll_cursor": 0,
       "seat_snapshots": {},
-      "showtimes": {}
+      "showtimes": {},
+      "verified_inventory": {}
     }
   },
-  "version": 1
+  "version": 2
 }
