@@ -1,0 +1,55 @@
+name: IMAX 70MM seat watcher
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: imax-seat-watcher
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      NTFY_SERVER: https://ntfy.sh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run watcher
+        run: python watcher.py
+
+      - name: Persist watcher state
+        shell: bash
+        run: |
+          if git diff --quiet -- state.json; then
+            echo "No state changes"
+            exit 0
+          fi
+          git config user.name "imax-seat-watcher"
+          git config user.email "actions@users.noreply.github.com"
+          git add state.json
+          git commit -m "chore: update IMAX watcher state [skip ci]"
+          for attempt in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            sleep $((attempt * 3))
+          done
+          echo "Could not persist state after 3 attempts" >&2
+          exit 1
