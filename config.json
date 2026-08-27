@@ -1,0 +1,54 @@
+{
+  "theater": {
+    "id": "207",
+    "name": "Cinemark Dallas XD and IMAX",
+    "slug": "tx-dallas/cinemark-dallas-xd-and-imax",
+    "timezone": "America/Chicago"
+  },
+  "polling": {
+    "request_gap_seconds": 6.0,
+    "timeout_seconds": 25
+  },
+  "movies": [
+    {
+      "name": "The Odyssey IMAX 70MM",
+      "short_name": "ODYSSEY",
+      "movie_id": "104867",
+      "bootstrap_start": "2026-08-27",
+      "bootstrap_end": "2026-09-16",
+      "max_date_pages_per_run": 5,
+      "frontier_lookbehind_days": 1,
+      "frontier_lookahead_days": 3,
+      "pre_sale_probe_dates": ["2026-09-16", "2026-09-17"],
+      "extra_probe_dates": ["2026-09-18", "2026-09-19", "2026-09-20"],
+      "seat_watch": {
+        "party_size": 1,
+        "preferred_rows": ["H", "J", "G", "K", "F", "E"],
+        "center_tolerance": 0.55,
+        "latest_dates_to_poll": 2,
+        "max_seat_maps_per_run": 8,
+        "only_within_days": 35
+      }
+    },
+    {
+      "name": "Dune: Part Three IMAX 70MM",
+      "short_name": "DUNE",
+      "movie_id": "109913",
+      "bootstrap_start": "2026-12-14",
+      "bootstrap_end": "2027-01-03",
+      "max_date_pages_per_run": 5,
+      "frontier_lookbehind_days": 1,
+      "frontier_lookahead_days": 3,
+      "pre_sale_probe_dates": ["2026-12-17", "2026-12-18"],
+      "extra_probe_dates": ["2026-12-19", "2026-12-20", "2026-12-25"],
+      "seat_watch": {
+        "party_size": 1,
+        "preferred_rows": ["H", "J", "G", "K", "F", "E"],
+        "center_tolerance": 0.55,
+        "latest_dates_to_poll": 2,
+        "max_seat_maps_per_run": 8,
+        "only_within_days": 120
+      }
+    }
+  ]
+}
