@@ -2,7 +2,8 @@ name: IMAX 70MM seat watcher
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    # Avoid GitHub Actions' congested round-minute scheduler slots.
+    - cron: "7,17,27,37,47,57 * * * *"
   workflow_dispatch:
     inputs:
       test_notification:
