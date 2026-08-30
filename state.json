@@ -3,7 +3,7 @@
     "104867": {
       "date_probe_cursor": 0,
       "initialized": true,
-      "seat_poll_cursor": 2,
+      "seat_poll_cursor": 0,
       "seat_snapshots": {
         "641806": [],
         "641827": [],
