@@ -79,7 +79,7 @@ resource "google_firestore_database" "state" {
   name                      = local.name
   location_id               = var.region
   type                      = "FIRESTORE_NATIVE"
-  deletion_protection_state = "DELETE_PROTECTION_ENABLED"
+  delete_protection_state = "DELETE_PROTECTION_ENABLED"
   depends_on                = [google_project_service.api]
 }
 
