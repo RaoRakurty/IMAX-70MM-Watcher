@@ -29,9 +29,11 @@
         "party_size": 1,
         "preferred_rows": ["H", "J", "G", "K"],
         "ignored_rows": ["A", "B", "C", "D"],
+        "earliest_showtime": "09:00",
+        "latest_showtime": "22:59",
         "center_tolerance": 0.55,
         "latest_dates_to_poll": 30,
-        "max_seat_maps_per_run": 8
+        "max_seat_maps_per_run": 20
       }
     },
     {
@@ -62,9 +64,11 @@
         "party_size": 1,
         "preferred_rows": ["H", "J", "G", "K"],
         "ignored_rows": ["A", "B", "C", "D"],
+        "earliest_showtime": "09:00",
+        "latest_showtime": "22:59",
         "center_tolerance": 0.55,
         "latest_dates_to_poll": 30,
-        "max_seat_maps_per_run": 8
+        "max_seat_maps_per_run": 20
       }
     }
   ]

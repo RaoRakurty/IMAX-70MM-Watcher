@@ -545,10 +545,12 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
         raise ScanError("No future probe dates configured; update the movie date range")
     log(f"{movie_cfg['short_name']}: scanning {len(dates)} date page(s): " + ", ".join(str(d) for d in dates))
     observations = []
+    date_checked_at = movie_state.setdefault("date_checked_at", {})
     for d in dates:
         url = f"{BASE}/theatres/{theater['slug']}?showDate={d.isoformat()}"
         page = fetch(url, gap, timeout)
         observation = validate_discovery(page, theater, d)
+        date_checked_at[d.isoformat()] = utcnow().isoformat()
         observations.append({"date": d.isoformat(), "result": observation})
         if observation == "date_not_published":
             continue
@@ -612,11 +614,18 @@ def eligible_showtimes(
         lower = today
         cutoff = today + timedelta(days=int(seat_cfg.get("only_within_days", 120)))
     future: list[Showtime] = []
+    earliest = datetime.strptime(seat_cfg.get("earliest_showtime", "00:00"), "%H:%M").time()
+    latest = datetime.strptime(seat_cfg.get("latest_showtime", "23:59"), "%H:%M").time()
+    if earliest > latest:
+        raise ScanError("seat_watch earliest_showtime must not be later than latest_showtime")
     for sid, meta in movie_state.get("showtimes", {}).items():
+        starts_at = datetime.fromisoformat(meta["iso"])
         day = parse_day(meta["iso"][:10])
         if day < lower:
             continue
-        if now is not None and datetime.fromisoformat(meta["iso"]) <= now.replace(tzinfo=None):
+        if not earliest <= starts_at.time() <= latest:
+            continue
+        if now is not None and starts_at <= now.replace(tzinfo=None):
             continue
         if day <= cutoff or (not window and sid in new_ids):
             future.append(Showtime(meta["theater_id"], sid, movie_cfg["movie_id"], meta["iso"]))
@@ -633,10 +642,15 @@ def select_showtimes_to_poll(
     """Poll every new showtime once, then rotate through a bounded recurring set."""
     seat_cfg = movie_cfg["seat_watch"]
     urgent = set(movie_state.get("pending_notification_checks", []))
-    all_future = eligible_showtimes(movie_cfg, movie_state, today, new_ids | urgent, now=now)
-    pending = set(movie_state.get("pending_seat_checks", [])) | new_ids | urgent
-    new = [st for st in all_future if st.showtime_id in pending]
-    recurring = [st for st in all_future if st.showtime_id not in pending]
+    pinned = {str(seed["showtime_id"]) for seed in movie_cfg.get("seed_showtimes", [])}
+    all_future = eligible_showtimes(movie_cfg, movie_state, today, new_ids | urgent | pinned, now=now)
+    eligible_ids = {st.showtime_id for st in all_future}
+    movie_state["eligible_showtimes_this_run"] = len(all_future)
+    pending = (set(movie_state.get("pending_seat_checks", [])) | new_ids | urgent) & eligible_ids
+    movie_state["pending_seat_checks"] = sorted(pending)
+    priority = pending | (pinned & eligible_ids)
+    new = [st for st in all_future if st.showtime_id in priority]
+    recurring = [st for st in all_future if st.showtime_id not in priority]
 
     # Focus recurring checks on the latest N distinct dates (the extension frontier).
     keep_dates_n = int(seat_cfg.get("latest_dates_to_poll", 2))
@@ -889,6 +903,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
                 "alertable_seats": movie_state.get("alertable_seats_this_run", 0),
                 "preferred_blocks": movie_state.get("preferred_blocks_this_run", 0),
                 "known_showtimes": len(movie_state["showtimes"]),
+                "eligible_showtimes": movie_state.get("eligible_showtimes_this_run", 0),
                 "alerts_queued": len(staged_alerts),
                 "dates_not_published": sum(d["result"] == "date_not_published" for d in movie_state["date_observations"]),
             }
@@ -1084,7 +1099,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Do not send ntfy alerts")
     parser.add_argument("--test-notify", action="store_true", help="Send an ntfy test and exit")
-    parser.add_argument("--max-seconds", type=int, default=270, help="Total scan budget, including retries")
+    parser.add_argument("--max-seconds", type=int, default=420, help="Total scan budget, including retries")
     args = parser.parse_args()
     config = load_json(CONFIG_PATH)
     if args.test_notify:
