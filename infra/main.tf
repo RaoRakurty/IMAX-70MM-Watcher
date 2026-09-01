@@ -75,12 +75,12 @@ resource "google_service_account" "scheduler" {
 }
 
 resource "google_firestore_database" "state" {
-  project                   = var.project_id
-  name                      = local.name
-  location_id               = var.region
-  type                      = "FIRESTORE_NATIVE"
+  project                 = var.project_id
+  name                    = local.name
+  location_id             = var.region
+  type                    = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_ENABLED"
-  depends_on                = [google_project_service.api]
+  depends_on              = [google_project_service.api]
 }
 
 resource "google_firestore_field" "unindexed_state" {
