@@ -1,9 +1,6 @@
 name: IMAX 70MM seat watcher
 
 on:
-  schedule:
-    # Avoid GitHub Actions' congested round-minute scheduler slots.
-    - cron: "7,17,27,37,47,57 * * * *"
   workflow_dispatch:
     inputs:
       test_notification:
@@ -11,6 +8,21 @@ on:
         required: false
         type: boolean
         default: false
+      scheduler_source:
+        description: "Reserved for the authenticated external scheduler"
+        required: false
+        type: string
+        default: "manual"
+      scheduled_slot:
+        description: "Reserved UTC scheduler slot"
+        required: false
+        type: string
+        default: ""
+      dispatch_signature:
+        description: "Reserved HMAC proof"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -22,7 +34,7 @@ concurrency:
 jobs:
   watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 8
     env:
       NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
       NTFY_SERVER: https://ntfy.sh
@@ -38,16 +50,45 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Authenticate ten-minute scheduler slot
+        id: scheduler
+        if: ${{ inputs.scheduler_source == 'cloudflare-cron' }}
+        env:
+          SCHEDULED_SLOT: ${{ inputs.scheduled_slot }}
+          DISPATCH_SIGNATURE: ${{ inputs.dispatch_signature }}
+          DISPATCH_HMAC_SECRET: ${{ secrets.DISPATCH_HMAC_SECRET }}
+        run: |
+          python dispatch_guard.py \
+            --slot "$SCHEDULED_SLOT" \
+            --signature "$DISPATCH_SIGNATURE"
+          echo "slot=$SCHEDULED_SLOT" >> "$GITHUB_OUTPUT"
+
+      - name: Reject unrecognized scheduler source
+        if: ${{ inputs.scheduler_source != 'manual' && inputs.scheduler_source != 'cloudflare-cron' }}
+        run: |
+          echo "Unrecognized scheduler source" >&2
+          exit 1
+
+      - name: Mark automatic check started
+        if: ${{ inputs.scheduler_source == 'cloudflare-cron' }}
+        env:
+          HC_PING_URL: ${{ secrets.HC_PING_URL }}
+        run: python healthcheck_ping.py start --url "$HC_PING_URL"
+
       - name: Send ntfy test notification
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.test_notification == true }}
+        if: ${{ inputs.scheduler_source == 'manual' && inputs.test_notification == true }}
         run: python watcher.py --test-notify
 
       - name: Run watcher
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.test_notification != true }}
+        id: scan
+        if: ${{ inputs.test_notification != true }}
         run: python watcher.py
 
       - name: Persist watcher state
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.test_notification != true }}
+        id: persist
+        # Failed scans must still persist backoff, successful other-movie results,
+        # and unsent notification outbox entries. The job remains failed.
+        if: ${{ always() && (steps.scan.outcome == 'success' || steps.scan.outcome == 'failure') }}
         shell: bash
         run: |
           if git diff --quiet -- state.json; then
@@ -61,7 +102,10 @@ jobs:
           git commit -m "chore: update IMAX watcher state [skip ci]"
 
           for attempt in 1 2 3; do
-            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            if ! git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              echo "Concurrent state conflict; refusing to overwrite remote state" >&2
+              exit 1
+            fi
             if git push origin "HEAD:${GITHUB_REF_NAME}"; then
               exit 0
             fi
@@ -70,3 +114,25 @@ jobs:
 
           echo "Could not persist state after 3 attempts" >&2
           exit 1
+
+      - name: Mark automatic check successful
+        if: ${{ inputs.scheduler_source == 'cloudflare-cron' && steps.scan.outcome == 'success' && steps.persist.outcome == 'success' }}
+        env:
+          HC_PING_URL: ${{ secrets.HC_PING_URL }}
+        run: python healthcheck_ping.py success --url "$HC_PING_URL"
+
+      - name: Record automatic cadence evidence
+        if: ${{ always() && inputs.scheduler_source == 'cloudflare-cron' }}
+        env:
+          SCHEDULED_SLOT: ${{ inputs.scheduled_slot }}
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+          PERSIST_OUTCOME: ${{ steps.persist.outcome }}
+        run: |
+          {
+            echo "## Signed automatic run"
+            echo
+            echo "- Scheduled slot: $SCHEDULED_SLOT"
+            echo "- Scan: $SCAN_OUTCOME"
+            echo "- State persistence: $PERSIST_OUTCOME"
+            echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } >> "$GITHUB_STEP_SUMMARY"

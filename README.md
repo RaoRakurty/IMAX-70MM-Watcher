@@ -1,5 +1,23 @@
 # Dallas Cinemark IMAX 70MM Seat Watcher
 
+## P1 reliability migration — no-billing design
+
+The production design uses a **Cloudflare Workers Free Cron Trigger** to invoke
+this public repository's GitHub Action every ten minutes. GitHub performs the
+scan, persists state, sends ntfy alerts, and pings Healthchecks.io only after a
+fully successful automatic run. No Google Cloud project or billing account is
+required. See [FREE_DEPLOYMENT.md](FREE_DEPLOYMENT.md).
+
+**Deployment and 24-hour live acceptance are still required before calling the
+ten-minute cadence fixed.** The earlier Google Cloud implementation remains in
+the repository as an optional alternative, documented in `DEPLOYMENT.md`.
+
+Failed, skipped/backoff, incomplete, or unparseable checks now exit nonzero.
+Health is sent only after validated observations for both movies and durable
+state/notification processing. Manual runs and ntfy tests never count as
+scheduler proof. A signed HMAC binds each automatic run to its UTC ten-minute
+slot, and stale or forged dispatches fail before scanning.
+
 Personal watcher configured for **Cinemark Dallas XD and IMAX** (TheaterId **207**) and these two targets:
 
 - **The Odyssey IMAX 70MM** — CinemarkMovieId `104867`
@@ -18,16 +36,18 @@ The high-value event is usually a newly released batch. Instead of hammering eve
 3. Polls seat maps only for the latest few dates when the movie is within the configured time horizon.
 4. Always inspects a newly discovered showtime once, so the first ntfy alert can tell you the best preferred seat immediately.
 
-The default GitHub Action runs every **10 minutes**. GitHub scheduled jobs can occasionally start late, so this is not a hard real-time guarantee. A public repository is the simplest way to avoid burning through private-repository Actions minutes; keep the ntfy topic in a repository Secret.
+GitHub's native cron previously showed multi-hour delays. The replacement uses
+Cloudflare only for the trigger and an independent Healthchecks.io heartbeat.
+Keep the ntfy topic, heartbeat URL, dispatch token, and HMAC secret private.
 
 ## Install on GitHub
 
-1. Create a new GitHub repository (private is fine) and upload the contents of this folder, including `.github/workflows/watch.yml`.
+1. Upload the contents of this folder, including `.github/workflows/watch.yml`.
 2. In the repository, open **Settings → Secrets and variables → Actions → New repository secret**.
 3. Create a secret named `NTFY_TOPIC` and set its value to your ntfy topic.
 4. Open **Actions → IMAX 70MM seat watcher → Run workflow** once manually.
 5. The first run creates a quiet baseline. It intentionally does **not** notify for everything already available.
-6. Run it manually a second time if you want to verify normal operation, or wait for the 10-minute schedule.
+6. Follow `FREE_DEPLOYMENT.md` to activate and validate the external ten-minute schedule.
 
 ### Test ntfy from your computer
 
@@ -64,13 +84,23 @@ For stricter center seats, lower `center_tolerance` (for example `0.35`). For a 
 
 ### Odyssey
 
-The initial baseline covers **Aug 27 through Sep 16, 2026**. After that, the watcher follows the newest known date and looks **7 days beyond it**, while also rescanning Sep 14–16 to catch added showtimes on the current final dates.
+The initial baseline covers **Aug 27 through Sep 16, 2026**, excluding dates
+already past. After that, the watcher checks one day before the newest known
+date through three days after it, capped at five date pages per run.
 
 ### Dune: Part Three
 
 The initial baseline covers **Dec 14, 2026 through Jan 3, 2027**. It always rescans opening weekend (Dec 17–20) plus Dec 25, because extra 70MM screenings can be added to already-on-sale dates.
 
 ## Notification examples
+
+Every run also prints a timestamped observation for each movie, including
+checked-showtime scope and whether ntfy accepted a notification. These lines
+appear in the GitHub run's **Summary** and logs, and in the cloud run record's
+`status_lines`. The time is the actual observation time in America/Chicago,
+not an assumed cron start. Dry runs, unpublished dates, and failed checks are
+labelled explicitly. Existing availability does not cause a new notification
+unless it meets the configured new-showtime/opening rules.
 
 New batch/showtime:
 
@@ -94,15 +124,16 @@ python3 watcher.py --dry-run
 
 ## Tests
 
-No third-party Python packages are required.
+The local watcher and unit tests use the Python standard library. The cloud
+service additionally requires `pip install -r requirements.txt`.
 
 ```bash
-python3 -m unittest -v test_watcher.py
+python3 -m unittest discover -v
 ```
 
 ## Notes
 
 - This relies on Cinemark's current server-rendered theater/showtime and seat-map HTML. If Cinemark changes the markup, the parser may need updating.
 - The code deliberately inserts several seconds between requests and uses a bounded scan window.
-- Do not reduce the interval aggressively. A 10-minute GitHub schedule plus the built-in request pacing is already much more responsive than manually checking while avoiding excessive traffic.
+- Do not reduce the interval. Ten minutes plus the built-in request pacing is responsive without excessive traffic.
 - Keep the ntfy topic in a GitHub Secret rather than committing it to a public repository.
