@@ -1,0 +1,9 @@
+name = "imax-watcher-scheduler"
+main = "worker.js"
+compatibility_date = "2026-08-31"
+
+# Safe bootstrap configuration. It creates the Worker and allows secrets to be
+# installed without enabling scheduled dispatches. Production activation uses
+# wrangler.toml, which installs the ten-minute Cron Trigger.
+[triggers]
+crons = []
