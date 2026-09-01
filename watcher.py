@@ -3,7 +3,7 @@
 
 Efficiency/safety goals:
 - expose validated scan results to a separately monitored 10-minute scheduler
-- after the first baseline, scan only a few frontier/probe date pages
+- rotate through a bounded 30-day date window in small batches
 - cache discovered showtimes in state.json
 - rotate through a bounded number of seat maps per run
 - require a real selectable seat before sending a "tickets available" alert
@@ -122,7 +122,8 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
         raise ScanError("Theater calendar missing or ambiguous")
     raw = calendars[0].get("data-showdates", "").split(" ")[0]
     try:
-        selected = datetime.strptime(raw, "%m/%d/%Y").date().isoformat()
+        selected_day = datetime.strptime(raw, "%m/%d/%Y").date()
+        selected = selected_day.isoformat()
         for day in offered:
             parse_day(day)
     except ValueError as exc:
@@ -139,10 +140,14 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
             raise ScanError("Showtime link belongs to a different theater")
         iso = (qs.get("Showtime") or [""])[0]
         try:
-            parsed_day = datetime.fromisoformat(iso).date().isoformat()
+            parsed_showtime = datetime.fromisoformat(iso)
         except ValueError as exc:
             raise ScanError("Malformed showtime date") from exc
-        if parsed_day != selected:
+        after_midnight_spillover = (
+            parsed_showtime.date() == selected_day + timedelta(days=1)
+            and parsed_showtime.hour < 6
+        )
+        if parsed_showtime.date() != selected_day and not after_midnight_spillover:
             raise ScanError("Showtime links do not match selected calendar date")
         links.append(href)
     # Require a recognizable listings container even for a legitimate empty day.
@@ -446,20 +451,55 @@ def known_future_dates(movie_state: dict, today: date) -> list[date]:
     )
 
 
+def monitoring_window(movie_cfg: dict, today: date) -> tuple[date, date] | None:
+    """Return an inclusive window that advances in fixed overlapping steps."""
+    raw_start = movie_cfg.get("monitoring_start")
+    if not raw_start:
+        return None
+    base = parse_day(str(raw_start))
+    window_days = int(movie_cfg.get("monitoring_window_days", 30))
+    shift_days = int(movie_cfg.get("monitoring_window_shift_days", 15))
+    if window_days <= 0 or shift_days <= 0 or shift_days > window_days:
+        raise ScanError("Monitoring window and shift must be positive, with shift no larger than window")
+    elapsed = max((today - base).days, 0)
+    start = base + timedelta(days=(elapsed // shift_days) * shift_days)
+    return start, start + timedelta(days=window_days - 1)
+
+
 def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> list[date]:
     """Return a small set of date pages worth probing this run.
 
-    First run: full bootstrap range to establish a baseline.
-    Steady state with known showtimes: current frontier plus the next few dates.
-    Pre-sale/no-known-showtimes: a small configured set of probe dates.
+    Rolling-window configs rotate through the entire active range. Legacy configs
+    retain the bootstrap/frontier/probe strategy.
     """
+    window = monitoring_window(movie_cfg, today)
+    max_pages = int(movie_cfg.get("max_date_pages_per_run", 5))
+    if window:
+        window_start, window_end = window
+        effective_start = max(today, window_start)
+        if effective_start > window_end:
+            return []
+        if not movie_state.get("initialized"):
+            next_date = parse_day(movie_state.get("bootstrap_next_date", effective_start.isoformat()))
+            start = max(effective_start, next_date)
+            return list(daterange(start, window_end))[:max_pages]
+
+        candidates = list(daterange(effective_start, window_end))
+        window_changed = movie_state.get("active_window_start") != window_start.isoformat()
+        cursor = 0 if window_changed else int(movie_state.get("date_probe_cursor", 0)) % len(candidates)
+        rotated = candidates[cursor:] + candidates[:cursor]
+        selected = rotated[:max_pages]
+        movie_state["date_probe_cursor"] = (cursor + len(selected)) % len(candidates)
+        movie_state["active_window_start"] = window_start.isoformat()
+        movie_state["active_window_end"] = window_end.isoformat()
+        return sorted(selected)
+
     if not movie_state.get("initialized"):
         start = max(today, parse_day(movie_state.get("bootstrap_next_date", movie_cfg["bootstrap_start"])))
         end = parse_day(movie_cfg["bootstrap_end"])
-        return list(daterange(start, end))[:int(movie_cfg.get("max_date_pages_per_run", 5))]
+        return list(daterange(start, end))[:max_pages]
 
     known = known_future_dates(movie_state, today)
-    max_pages = int(movie_cfg.get("max_date_pages_per_run", 5))
     if known:
         frontier = max(known)
         lookbehind = int(movie_cfg.get("frontier_lookbehind_days", 1))
@@ -524,7 +564,9 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
                 movie_state["showtimes"][st.showtime_id]["iso"] = st.iso
     if first_run:
         movie_state["bootstrap_next_date"] = (dates[-1] + timedelta(days=1)).isoformat()
-        movie_state["initialized"] = dates[-1] >= parse_day(movie_cfg["bootstrap_end"])
+        window = monitoring_window(movie_cfg, today)
+        baseline_end = window[1] if window else parse_day(movie_cfg["bootstrap_end"])
+        movie_state["initialized"] = dates[-1] >= baseline_end
     movie_state["date_observations"] = observations
     return first_run, new_showtimes
 
@@ -554,25 +596,44 @@ def seed_configured_showtimes(movie_cfg: dict, movie_state: dict, theater: dict)
         existing["iso"] = iso
 
 
-def eligible_showtimes(movie_cfg: dict, movie_state: dict, today: date, new_ids: set[str]) -> list[Showtime]:
+def eligible_showtimes(
+    movie_cfg: dict,
+    movie_state: dict,
+    today: date,
+    new_ids: set[str],
+    now: datetime | None = None,
+) -> list[Showtime]:
     seat_cfg = movie_cfg["seat_watch"]
-    within_days = int(seat_cfg.get("only_within_days", 120))
-    cutoff = today + timedelta(days=within_days)
+    window = monitoring_window(movie_cfg, today)
+    if window:
+        lower = max(today, window[0])
+        cutoff = window[1]
+    else:
+        lower = today
+        cutoff = today + timedelta(days=int(seat_cfg.get("only_within_days", 120)))
     future: list[Showtime] = []
     for sid, meta in movie_state.get("showtimes", {}).items():
         day = parse_day(meta["iso"][:10])
-        if day < today:
+        if day < lower:
             continue
-        if day <= cutoff or sid in new_ids:
+        if now is not None and datetime.fromisoformat(meta["iso"]) <= now.replace(tzinfo=None):
+            continue
+        if day <= cutoff or (not window and sid in new_ids):
             future.append(Showtime(meta["theater_id"], sid, movie_cfg["movie_id"], meta["iso"]))
     return sorted(future, key=lambda s: s.iso)
 
 
-def select_showtimes_to_poll(movie_cfg: dict, movie_state: dict, today: date, new_ids: set[str]) -> list[Showtime]:
+def select_showtimes_to_poll(
+    movie_cfg: dict,
+    movie_state: dict,
+    today: date,
+    new_ids: set[str],
+    now: datetime | None = None,
+) -> list[Showtime]:
     """Poll every new showtime once, then rotate through a bounded recurring set."""
     seat_cfg = movie_cfg["seat_watch"]
     urgent = set(movie_state.get("pending_notification_checks", []))
-    all_future = eligible_showtimes(movie_cfg, movie_state, today, new_ids | urgent)
+    all_future = eligible_showtimes(movie_cfg, movie_state, today, new_ids | urgent, now=now)
     pending = set(movie_state.get("pending_seat_checks", [])) | new_ids | urgent
     new = [st for st in all_future if st.showtime_id in pending]
     recurring = [st for st in all_future if st.showtime_id not in pending]
@@ -615,7 +676,8 @@ def poll_seats_and_alert(
     new_ids = set() if first_run else discovered_ids
     if not first_run:
         movie_state["pending_seat_checks"] = sorted(discovered_ids)
-    selected = select_showtimes_to_poll(movie_cfg, movie_state, datetime.now(tz).date(), new_ids)
+    local_now = datetime.now(tz)
+    selected = select_showtimes_to_poll(movie_cfg, movie_state, local_now.date(), new_ids, now=local_now)
     log(f"{movie_cfg['short_name']}: polling {len(selected)} seat map(s)")
     gap = float(polling.get("request_gap_seconds", 6))
     timeout = int(polling.get("timeout_seconds", 25))

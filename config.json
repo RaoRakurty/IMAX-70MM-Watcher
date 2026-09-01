@@ -15,8 +15,11 @@
       "name": "The Odyssey IMAX 70MM",
       "short_name": "ODYSSEY",
       "movie_id": "104867",
-      "bootstrap_start": "2026-08-27",
-      "bootstrap_end": "2026-09-16",
+      "monitoring_start": "2026-09-01",
+      "monitoring_window_days": 30,
+      "monitoring_window_shift_days": 15,
+      "bootstrap_start": "2026-09-01",
+      "bootstrap_end": "2026-09-30",
       "max_date_pages_per_run": 5,
       "frontier_lookbehind_days": 1,
       "frontier_lookahead_days": 3,
@@ -27,17 +30,19 @@
         "preferred_rows": ["H", "J", "G", "K"],
         "ignored_rows": ["A", "B", "C", "D"],
         "center_tolerance": 0.55,
-        "latest_dates_to_poll": 2,
-        "max_seat_maps_per_run": 8,
-        "only_within_days": 35
+        "latest_dates_to_poll": 30,
+        "max_seat_maps_per_run": 8
       }
     },
     {
       "name": "Dune: Part Three IMAX 70MM",
       "short_name": "DUNE",
       "movie_id": "109913",
-      "bootstrap_start": "2026-12-14",
-      "bootstrap_end": "2027-01-03",
+      "monitoring_start": "2026-12-17",
+      "monitoring_window_days": 30,
+      "monitoring_window_shift_days": 15,
+      "bootstrap_start": "2026-12-17",
+      "bootstrap_end": "2027-01-15",
       "max_date_pages_per_run": 5,
       "frontier_lookbehind_days": 1,
       "frontier_lookahead_days": 3,
@@ -58,9 +63,8 @@
         "preferred_rows": ["H", "J", "G", "K"],
         "ignored_rows": ["A", "B", "C", "D"],
         "center_tolerance": 0.55,
-        "latest_dates_to_poll": 365,
-        "max_seat_maps_per_run": 8,
-        "only_within_days": 120
+        "latest_dates_to_poll": 30,
+        "max_seat_maps_per_run": 8
       }
     }
   ]
