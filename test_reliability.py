@@ -32,10 +32,11 @@ def listing(day=DAY, movie="104867", sid="123", selected=None, offered=None):
               f'ShowtimeId={sid}&amp;CinemarkMovieId={movie}&amp;Showtime={selected}T19:15:00">go</a></div>')
 
 
-def seat_map(st=ST, available=True):
+def seat_map(st=ST, available=True, row="H", available_numbers=None):
     action = st.url.replace("&", "&amp;")
     return (f'<title>Cinemark - Reserve Your Seats</title><form id="FormSeatMap" action="{action}">'
-            + "".join(f'<button info="H,{n},8,{n},{st.showtime_id}" available="{str(available)}" '
+            + "".join(f'<button info="{row},{n},8,{n},{st.showtime_id}" '
+                      f'available="{str(n in available_numbers if available_numbers is not None else available)}" '
                       f'class="seatBlock">seat</button>' for n in range(10, 15)) + '</form>')
 
 
@@ -44,6 +45,7 @@ def config(two=True):
     cfg["polling"] = {"request_gap_seconds": 0, "timeout_seconds": 1}
     cfg["movies"] = cfg["movies"][:2 if two else 1]
     for movie in cfg["movies"]:
+        movie.pop("seed_showtimes", None)
         movie.update(bootstrap_start=str(DAY), bootstrap_end=str(DAY),
                      pre_sale_probe_dates=[str(DAY)], extra_probe_dates=[],
                      frontier_lookbehind_days=0, frontier_lookahead_days=0)
@@ -92,6 +94,11 @@ class ValidationTests(unittest.TestCase):
 
     def test_unpublished_date_not_current_inventory(self):
         page = listing(day=DAY, selected=DAY-timedelta(days=1))
+        self.assertEqual(w.validate_discovery(page, THEATER, DAY), "date_not_published")
+
+    def test_unpublished_date_with_empty_fallback_is_not_failure(self):
+        page = listing(day=DAY, selected=DAY-timedelta(days=1))
+        page = page.split('<div id="listOfMoviesOrTheaters">')[0] + '<div id="listOfMoviesOrTheaters"></div>'
         self.assertEqual(w.validate_discovery(page, THEATER, DAY), "date_not_published")
 
     def test_ignored_advertised_date_fails(self):
@@ -234,6 +241,51 @@ class ScanTests(unittest.TestCase):
         cfg["bootstrap_end"] = str(DAY+timedelta(days=30))
         self.assertEqual(len(w.scan_dates_for_movie(cfg, {}, DAY)), 5)
 
+    def test_configured_showtime_seeded_for_direct_polling(self):
+        movie = config(False)["movies"][0]
+        movie["seed_showtimes"] = [{"showtime_id": "644486", "iso": "2026-12-17T15:15:00"}]
+        movie_state = {"showtimes": {}}
+        w.seed_configured_showtimes(movie, movie_state, THEATER)
+        self.assertEqual(movie_state["showtimes"]["644486"]["theater_id"], "207")
+        self.assertEqual(movie_state["showtimes"]["644486"]["iso"], "2026-12-17T15:15:00")
+
+    def test_ignored_rows_never_alert(self):
+        movie = config(False)["movies"][0]
+        movie["seat_watch"].update(ignored_rows=["A", "B", "C", "D"], preferred_rows=["G", "H", "J", "K"])
+        movie_state = state(False, True)["movies"][ST.movie_id]
+        notify = Mock()
+        with patch.object(w, "fetch", return_value=seat_map(row="D")):
+            w.poll_seats_and_alert(movie, movie_state, {"request_gap_seconds": 0, "timeout_seconds": 1},
+                                   w.ZoneInfo("America/Chicago"), False, [], "test", False, notify)
+        notify.assert_not_called()
+        self.assertEqual(movie_state["selectable_seats_this_run"], 5)
+        self.assertEqual(movie_state["alertable_seats_this_run"], 0)
+
+    def test_nonpreferred_seat_reopening_alerts(self):
+        movie = config(False)["movies"][0]
+        movie["seat_watch"].update(ignored_rows=["A", "B", "C", "D"], preferred_rows=["G", "H", "J", "K"])
+        movie_state = state(False, True)["movies"][ST.movie_id]
+        args = (movie, movie_state, {"request_gap_seconds": 0, "timeout_seconds": 1},
+                w.ZoneInfo("America/Chicago"), False, [], "test", False)
+        with patch.object(w, "fetch", return_value=seat_map(row="E", available_numbers={10})):
+            w.poll_seats_and_alert(*args, notify=Mock())
+        notify = Mock()
+        with patch.object(w, "fetch", return_value=seat_map(row="E", available_numbers={10, 11})):
+            w.poll_seats_and_alert(*args, notify=notify)
+        notify.assert_called_once()
+        self.assertEqual(notify.call_args.args[1], "SEAT OPENED: ODYSSEY")
+
+    def test_existing_inventory_is_baselined_when_per_seat_snapshot_is_added(self):
+        movie = config(False)["movies"][0]
+        movie_state = state(False, True)["movies"][ST.movie_id]
+        movie_state["verified_inventory"] = {ST.showtime_id: True}
+        notify = Mock()
+        with patch.object(w, "fetch", return_value=seat_map(row="E", available_numbers={10, 11})):
+            w.poll_seats_and_alert(movie, movie_state, {"request_gap_seconds": 0, "timeout_seconds": 1},
+                                   w.ZoneInfo("America/Chicago"), False, [], "test", False, notify)
+        notify.assert_not_called()
+        self.assertEqual(movie_state["selectable_snapshots"][ST.showtime_id], ["E10", "E11"])
+
     def test_new_showtime_overflow_preserved(self):
         cfg = config(False)["movies"][0]
         cfg["seat_watch"]["max_seat_maps_per_run"] = 1
@@ -309,6 +361,24 @@ class ScanTests(unittest.TestCase):
             self.assertEqual(w.main(), 0)
         notify.assert_called_once()
         scan.assert_not_called()
+
+    def test_daily_status_queued_once_and_acknowledged(self):
+        cfg = config(False)
+        cfg["polling"]["daily_status_after"] = "09:00"
+        result = {"finished_at": "2026-09-01T14:05:00+00:00", "movies": {
+            ST.movie_id: {"status": "success", "checked_at": "2026-09-01T14:05:00+00:00",
+                          "seat_maps_checked": 1, "selectable_seats": 3,
+                          "alertable_seats": 0, "preferred_blocks": 0}
+        }}
+        s = {"outbox": []}
+        now = datetime(2026, 9, 1, 14, 5, tzinfo=timezone.utc)
+        self.assertTrue(w.queue_daily_status(cfg, s, result, now=now))
+        self.assertFalse(w.queue_daily_status(cfg, s, result, now=now))
+        persist = Mock()
+        with patch.object(w, "publish_ntfy"):
+            self.assertEqual(w.flush_outbox(s, persist, "test"), 1)
+        self.assertEqual(s["last_daily_status_date"], "2026-09-01")
+        self.assertFalse(w.queue_daily_status(cfg, s, result, now=now))
 
 
 class RunnerTests(unittest.TestCase):
