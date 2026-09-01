@@ -293,6 +293,30 @@ class ScanTests(unittest.TestCase):
         selected = w.eligible_showtimes(cfg, movie_state, DAY, {"past", "future"}, now=now)
         self.assertEqual([st.showtime_id for st in selected], ["future"])
 
+    def test_unwanted_early_and_late_showtimes_are_not_polled(self):
+        cfg = config(False)["movies"][0]
+        cfg["seat_watch"].update(earliest_showtime="09:00", latest_showtime="22:59")
+        movie_state = {"showtimes": {
+            "0245": {"theater_id": "207", "iso": DAY.isoformat() + "T02:45:00"},
+            "0800": {"theater_id": "207", "iso": DAY.isoformat() + "T08:00:00"},
+            "0900": {"theater_id": "207", "iso": DAY.isoformat() + "T09:00:00"},
+            "2259": {"theater_id": "207", "iso": DAY.isoformat() + "T22:59:00"},
+            "2300": {"theater_id": "207", "iso": DAY.isoformat() + "T23:00:00"},
+        }}
+        selected = w.eligible_showtimes(cfg, movie_state, DAY, set(movie_state["showtimes"]))
+        self.assertEqual([st.showtime_id for st in selected], ["0900", "2259"])
+
+    def test_configured_seed_showtime_is_pinned_ahead_of_rotation(self):
+        cfg = config(False)["movies"][0]
+        cfg["seed_showtimes"] = [{"showtime_id": "pinned", "iso": DAY.isoformat() + "T15:15:00"}]
+        cfg["seat_watch"]["max_seat_maps_per_run"] = 1
+        movie_state = {"showtimes": {
+            "other": {"theater_id": "207", "iso": DAY.isoformat() + "T10:00:00"},
+            "pinned": {"theater_id": "207", "iso": DAY.isoformat() + "T15:15:00"},
+        }, "pending_seat_checks": [], "seat_poll_cursor": 0}
+        selected = w.select_showtimes_to_poll(cfg, movie_state, DAY, set())
+        self.assertEqual([st.showtime_id for st in selected], ["pinned"])
+
     def test_shifted_window_restarts_date_rotation_at_current_date(self):
         cfg = config(False)["movies"][0]
         cfg.update(monitoring_window_days=30, monitoring_window_shift_days=15,
@@ -310,6 +334,16 @@ class ScanTests(unittest.TestCase):
         w.seed_configured_showtimes(movie, movie_state, THEATER)
         self.assertEqual(movie_state["showtimes"]["644486"]["theater_id"], "207")
         self.assertEqual(movie_state["showtimes"]["644486"]["iso"], "2026-12-17T15:15:00")
+
+    def test_date_page_observation_is_timestamped(self):
+        movie = config(False)["movies"][0]
+        movie_state = {"initialized": True, "showtimes": {}}
+        checked = datetime(2026, 9, 1, 14, 5, tzinfo=timezone.utc)
+        with patch.object(w, "fetch", return_value=listing(movie="999")), \
+                patch.object(w, "utcnow", return_value=checked):
+            w.discover_movie(movie, movie_state, THEATER,
+                             {"request_gap_seconds": 0, "timeout_seconds": 1}, DAY)
+        self.assertEqual(movie_state["date_checked_at"][DAY.isoformat()], checked.isoformat())
 
     def test_ignored_rows_never_alert(self):
         movie = config(False)["movies"][0]

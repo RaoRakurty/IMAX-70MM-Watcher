@@ -74,7 +74,8 @@ That sends a test notification with a link back to the Dallas Cinemark page.
 The watcher calculates the physical center of each row from the seat-map column
 positions, so it does not assume that a particular seat number is the center.
 Rows G/H/J/K receive prime-seat alerts, E/F can still produce a general newly
-opened-seat alert, and A-D never alert.
+opened-seat alert, and A-D never alert. Shows earlier than 9:00 AM or starting
+at 11:00 PM and later are excluded before seat-map polling.
 
 If you need **two adjacent seats**, change both movie sections to:
 
@@ -96,7 +97,8 @@ The first window starts immediately on **Sep 1, 2026** and covers through
 The first window starts exactly on **Dec 17, 2026** and covers through
 **Jan 15, 2027**. On Jan 1 it advances to Jan 1 through Jan 30. Date discovery
 checks at most five pages per run, while known showtimes are cached and their
-seat maps remain in the existing bounded rotation.
+seat maps remain in a paced rotation of at most 20 maps per movie per run. The
+configured Dec 17, 3:15 PM Dune showtime is pinned into every natural run.
 
 ## Notification examples
 
