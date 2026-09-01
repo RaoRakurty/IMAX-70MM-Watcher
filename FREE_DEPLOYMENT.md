@@ -14,8 +14,9 @@ send that heartbeat.
 
 ## One-time setup
 
-1. Merge this implementation into `main`. Native GitHub cron is intentionally
-   removed from `watch.yml` so it cannot overlap the external trigger.
+1. Keep this implementation unmerged while credentials and the disabled
+   Cloudflare Worker are staged. This avoids both a monitoring gap and an
+   early Cron dispatch with incomplete secrets.
 
 2. In GitHub, create a **fine-grained personal access token** restricted to:
 
@@ -43,18 +44,29 @@ send that heartbeat.
    GitHub repository secret `HC_PING_URL`. Keep the existing `NTFY_TOPIC`
    secret. Never store these values in workflow inputs or repository files.
 
-5. Create a Cloudflare Free account. From the repository root, authenticate and
-   deploy the Worker:
+5. Create a Cloudflare Free account. From the repository root, authenticate,
+   deploy the bootstrap configuration with **no Cron Trigger**, and install the
+   two Worker secrets:
 
    ```bash
-   npx wrangler login
-   npx wrangler secret put GITHUB_ACTIONS_TOKEN --config free_scheduler/wrangler.toml
-   npx wrangler secret put DISPATCH_HMAC_SECRET --config free_scheduler/wrangler.toml
-   npx wrangler deploy --config free_scheduler/wrangler.toml
+   npx wrangler login --device --use-keyring
+   npx wrangler deploy --config free_scheduler/wrangler.setup.toml
+   npx wrangler secret put GITHUB_ACTIONS_TOKEN --config free_scheduler/wrangler.setup.toml
+   npx wrangler secret put DISPATCH_HMAC_SECRET --config free_scheduler/wrangler.setup.toml
    ```
 
-   Enter secret values only into Wrangler's secure prompts. The checked-in
-   `wrangler.toml` installs the UTC ten-minute Cron Trigger.
+   Enter secret values only into Wrangler's secure prompts. Verify in the
+   Cloudflare dashboard that `imax-watcher-scheduler` has both secret names and
+   no Cron Trigger.
+
+6. Merge the pull request into `main`. Native GitHub cron is intentionally
+   removed from `watch.yml` so it cannot overlap the external trigger.
+
+7. From the updated `main` branch, activate the UTC ten-minute Cron Trigger:
+
+   ```bash
+   npx wrangler deploy --config free_scheduler/wrangler.toml
+   ```
 
 ## Proof and acceptance
 
