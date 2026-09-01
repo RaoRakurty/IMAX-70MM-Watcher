@@ -46,7 +46,9 @@ def config(two=True):
     cfg["movies"] = cfg["movies"][:2 if two else 1]
     for movie in cfg["movies"]:
         movie.pop("seed_showtimes", None)
-        movie.update(bootstrap_start=str(DAY), bootstrap_end=str(DAY),
+        movie.update(monitoring_start=str(DAY), monitoring_window_days=1,
+                     monitoring_window_shift_days=1,
+                     bootstrap_start=str(DAY), bootstrap_end=str(DAY),
                      pre_sale_probe_dates=[str(DAY)], extra_probe_dates=[],
                      frontier_lookbehind_days=0, frontier_lookahead_days=0)
     return cfg
@@ -130,6 +132,13 @@ class ValidationTests(unittest.TestCase):
     def test_wrong_link_date_fails(self):
         with self.assertRaises(w.ScanError):
             w.validate_discovery(listing().replace(ISO, "2000-01-01T10:00:00"), THEATER, DAY)
+
+    def test_after_midnight_showtime_belongs_to_previous_business_day(self):
+        spillover = DAY + timedelta(days=1)
+        late_link = (f'<a href="/TicketSeatMap/?TheaterId=207&amp;ShowtimeId=124&amp;'
+                     f'CinemarkMovieId=104867&amp;Showtime={spillover}T02:45:00">late</a>')
+        page = listing().replace("</a></div>", f"</a>{late_link}</div>")
+        self.assertEqual(w.validate_discovery(page, THEATER, DAY), "selected_date")
 
     def test_sold_out_map_valid(self):
         seats = w.validated_seats(seat_map(available=False), ST)
@@ -238,8 +247,61 @@ class ScanTests(unittest.TestCase):
 
     def test_bootstrap_bounded(self):
         cfg = config(False)["movies"][0]
-        cfg["bootstrap_end"] = str(DAY+timedelta(days=30))
+        cfg.update(monitoring_window_days=30, monitoring_window_shift_days=15,
+                   bootstrap_end=str(DAY + timedelta(days=29)))
         self.assertEqual(len(w.scan_dates_for_movie(cfg, {}, DAY)), 5)
+
+    def test_monitoring_window_is_30_days_and_shifts_after_15(self):
+        cfg = {"monitoring_start": "2026-12-17", "monitoring_window_days": 30,
+               "monitoring_window_shift_days": 15}
+        self.assertEqual(w.monitoring_window(cfg, date(2026, 12, 17)),
+                         (date(2026, 12, 17), date(2027, 1, 15)))
+        self.assertEqual(w.monitoring_window(cfg, date(2026, 12, 31)),
+                         (date(2026, 12, 17), date(2027, 1, 15)))
+        self.assertEqual(w.monitoring_window(cfg, date(2027, 1, 1)),
+                         (date(2027, 1, 1), date(2027, 1, 30)))
+
+    def test_dune_window_starts_december_17(self):
+        movie = w.load_json(w.CONFIG_PATH)["movies"][1]
+        self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
+                         (date(2026, 12, 17), date(2027, 1, 15)))
+
+    def test_odyssey_window_starts_immediately(self):
+        movie = w.load_json(w.CONFIG_PATH)["movies"][0]
+        self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
+                         (date(2026, 9, 1), date(2026, 9, 30)))
+
+    def test_showtime_selection_stays_inside_active_window(self):
+        cfg = config(False)["movies"][0]
+        cfg.update(monitoring_window_days=30, monitoring_window_shift_days=15)
+        movie_state = {"showtimes": {
+            "before": {"theater_id": "207", "iso": (DAY - timedelta(days=1)).isoformat() + "T10:00:00"},
+            "inside": {"theater_id": "207", "iso": (DAY + timedelta(days=29)).isoformat() + "T10:00:00"},
+            "after": {"theater_id": "207", "iso": (DAY + timedelta(days=30)).isoformat() + "T10:00:00"},
+        }}
+        selected = w.eligible_showtimes(cfg, movie_state, DAY, {"before", "inside", "after"})
+        self.assertEqual([st.showtime_id for st in selected], ["inside"])
+
+    def test_showtime_that_already_started_today_is_not_polled(self):
+        cfg = config(False)["movies"][0]
+        movie_state = {"showtimes": {
+            "past": {"theater_id": "207", "iso": DAY.isoformat() + "T08:00:00"},
+            "future": {"theater_id": "207", "iso": DAY.isoformat() + "T19:15:00"},
+        }}
+        now = datetime.fromisoformat(DAY.isoformat() + "T12:00:00").replace(
+            tzinfo=w.ZoneInfo("America/Chicago"))
+        selected = w.eligible_showtimes(cfg, movie_state, DAY, {"past", "future"}, now=now)
+        self.assertEqual([st.showtime_id for st in selected], ["future"])
+
+    def test_shifted_window_restarts_date_rotation_at_current_date(self):
+        cfg = config(False)["movies"][0]
+        cfg.update(monitoring_window_days=30, monitoring_window_shift_days=15,
+                   max_date_pages_per_run=5)
+        shifted_day = DAY + timedelta(days=15)
+        movie_state = {"initialized": True, "date_probe_cursor": 20,
+                       "active_window_start": DAY.isoformat()}
+        self.assertEqual(w.scan_dates_for_movie(cfg, movie_state, shifted_day),
+                         [shifted_day + timedelta(days=n) for n in range(5)])
 
     def test_configured_showtime_seeded_for_direct_polling(self):
         movie = config(False)["movies"][0]
@@ -375,7 +437,7 @@ class ScanTests(unittest.TestCase):
         self.assertTrue(w.queue_daily_status(cfg, s, result, now=now))
         self.assertFalse(w.queue_daily_status(cfg, s, result, now=now))
         persist = Mock()
-        with patch.object(w, "publish_ntfy"):
+        with patch.object(w, "publish_ntfy"), patch.object(w, "utcnow", return_value=now):
             self.assertEqual(w.flush_outbox(s, persist, "test"), 1)
         self.assertEqual(s["last_daily_status_date"], "2026-09-01")
         self.assertFalse(w.queue_daily_status(cfg, s, result, now=now))

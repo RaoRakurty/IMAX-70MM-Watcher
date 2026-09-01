@@ -32,8 +32,8 @@ It does **not** log in, hold seats, click checkout, or purchase tickets.
 The high-value event is usually a newly released batch. Instead of hammering every seat map all day, the watcher:
 
 1. Baselines the current known showtimes silently on its first run.
-2. Rechecks only the newest date frontier plus a few strategic dates where extra screenings are likely to be added.
-3. Polls seat maps only for the latest few dates when the movie is within the configured time horizon.
+2. Rotates through each movie's active 30-day window in five-date batches.
+3. Advances that window by 15 days every 15 days, retaining a 15-day overlap.
 4. Always inspects a newly discovered showtime once, so the first ntfy alert can tell you the best preferred seat immediately.
 
 GitHub's native cron previously showed multi-hour delays. The replacement uses
@@ -66,11 +66,15 @@ That sends a test notification with a link back to the Dallas Cinemark page.
 
 ```json
 "party_size": 1,
-"preferred_rows": ["H", "J", "G", "K", "F", "E"],
+"preferred_rows": ["H", "J", "G", "K"],
+"ignored_rows": ["A", "B", "C", "D"],
 "center_tolerance": 0.55
 ```
 
-The watcher calculates the physical center of each row from the seat-map column positions, so it does not assume that a particular seat number is the center. The row list is ordered best-first, with H/J favored before nearby rows.
+The watcher calculates the physical center of each row from the seat-map column
+positions, so it does not assume that a particular seat number is the center.
+Rows G/H/J/K receive prime-seat alerts, E/F can still produce a general newly
+opened-seat alert, and A-D never alert.
 
 If you need **two adjacent seats**, change both movie sections to:
 
@@ -84,13 +88,15 @@ For stricter center seats, lower `center_tolerance` (for example `0.35`). For a 
 
 ### Odyssey
 
-The initial baseline covers **Aug 27 through Sep 16, 2026**, excluding dates
-already past. After that, the watcher checks one day before the newest known
-date through three days after it, capped at five date pages per run.
+The first window starts immediately on **Sep 1, 2026** and covers through
+**Sep 30, 2026**. On Sep 16 it advances to Sep 16 through Oct 15.
 
 ### Dune: Part Three
 
-The initial baseline covers **Dec 14, 2026 through Jan 3, 2027**. It always rescans opening weekend (Dec 17–20) plus Dec 25, because extra 70MM screenings can be added to already-on-sale dates.
+The first window starts exactly on **Dec 17, 2026** and covers through
+**Jan 15, 2027**. On Jan 1 it advances to Jan 1 through Jan 30. Date discovery
+checks at most five pages per run, while known showtimes are cached and their
+seat maps remain in the existing bounded rotation.
 
 ## Notification examples
 
