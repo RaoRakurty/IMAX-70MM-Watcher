@@ -104,6 +104,7 @@ class Runner:
         try:
             scan = watcher.run_once(self.config, state)
             run.update(status=scan["status"], movies=scan["movies"])
+            watcher.queue_daily_status(self.config, state, scan)
             # Persist observations AND notification outbox atomically first.
             self.store.save(owner, state)
             try:

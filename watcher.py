@@ -148,13 +148,13 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
     # Require a recognizable listings container even for a legitimate empty day.
     if not any(a.get("id") == "listOfMoviesOrTheaters" for _, a in facts.tags):
         raise ScanError("Theater listings container missing")
+    wanted = requested_day.isoformat()
+    if selected != wanted and wanted not in offered:
+        return "date_not_published"
     if not links and not re.search(r"\b(no showtimes available|there are no showtimes)\b", facts.listing_text, re.I):
         raise ScanError("Empty listings without an explicit no-showtimes response")
-    wanted = requested_day.isoformat()
     if selected == wanted:
         return "selected_date"
-    if wanted not in offered and links:
-        return "date_not_published"
     raise ScanError("Server did not return the requested advertised date")
 
 
@@ -529,6 +529,31 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
     return first_run, new_showtimes
 
 
+def seed_configured_showtimes(movie_cfg: dict, movie_state: dict, theater: dict) -> None:
+    """Keep user-verified direct seat-map showtimes in the normal polling rotation."""
+    for seed in movie_cfg.get("seed_showtimes", []):
+        sid = str(seed.get("showtime_id", ""))
+        iso = str(seed.get("iso", ""))
+        if not sid.isdigit():
+            raise ScanError("Configured seed showtime ID is invalid")
+        try:
+            datetime.fromisoformat(iso)
+        except ValueError as exc:
+            raise ScanError("Configured seed showtime timestamp is invalid") from exc
+        existing = movie_state["showtimes"].setdefault(
+            sid,
+            {
+                "theater_id": str(theater["id"]),
+                "iso": iso,
+                "first_seen": datetime.now().isoformat(timespec="seconds"),
+                "source": "configured_direct_seat_map",
+            },
+        )
+        if existing.get("theater_id") != str(theater["id"]):
+            raise ScanError("Configured seed showtime belongs to another theater")
+        existing["iso"] = iso
+
+
 def eligible_showtimes(movie_cfg: dict, movie_state: dict, today: date, new_ids: set[str]) -> list[Showtime]:
     seat_cfg = movie_cfg["seat_watch"]
     within_days = int(seat_cfg.get("only_within_days", 120))
@@ -595,6 +620,7 @@ def poll_seats_and_alert(
     gap = float(polling.get("request_gap_seconds", 6))
     timeout = int(polling.get("timeout_seconds", 25))
     available_count = 0
+    alertable_count = 0
     preferred_count = 0
 
     for st in selected:
@@ -603,9 +629,11 @@ def poll_seats_and_alert(
 
         selectable = [s for s in seats if s.available]
         available_count += len(selectable)
-        # Critical false-positive guard: a date/showtime listing is not availability.
-        # A new-showtime alert requires at least one actual selectable seat.
-        verified_inventory = bool(selectable)
+        ignored_rows = {str(row).upper() for row in seat_cfg.get("ignored_rows", [])}
+        alertable = [s for s in selectable if s.row.upper() not in ignored_rows]
+        alertable_count += len(alertable)
+        # A listing is never availability, and explicitly ignored rows never alert.
+        verified_inventory = bool(alertable)
 
         blocks = best_blocks(
             seats,
@@ -616,9 +644,19 @@ def poll_seats_and_alert(
         current = [b["signature"] for b in blocks]
         preferred_count += len(blocks)
         previous = set(movie_state.setdefault("seat_snapshots", {}).get(st.showtime_id, []))
+        selectable_snapshots = movie_state.setdefault("selectable_snapshots", {})
+        had_selectable_snapshot = st.showtime_id in selectable_snapshots
+        previous_selectable = set(selectable_snapshots.get(st.showtime_id, []))
+        current_selectable = sorted(s.label for s in alertable)
+        was_verified = bool(movie_state.setdefault("verified_inventory", {}).get(st.showtime_id, False))
+        # Existing verified inventory predates per-seat snapshots. Baseline it once
+        # so a state migration cannot mislabel every old seat as newly opened.
+        newly_selectable = [] if was_verified and not had_selectable_snapshot else [
+            s for s in alertable if s.label not in previous_selectable
+        ]
         is_new_showtime = st.showtime_id in discovered_ids
 
-        if not first_run and is_new_showtime and verified_inventory:
+        if not first_run and verified_inventory and (is_new_showtime or not was_verified):
             if blocks:
                 best = blocks[0]
                 title = f"VERIFIED {movie_cfg['short_name']} IMAX 70MM"
@@ -628,10 +666,10 @@ def poll_seats_and_alert(
                 )
             else:
                 title = f"VERIFIED {movie_cfg['short_name']} IMAX 70MM"
-                sample = ", ".join(s.label for s in selectable[:4])
+                sample = ", ".join(s.label for s in alertable[:4])
                 msg = (
                     f"{format_showtime(st.iso, tz)} — real selectable inventory verified"
-                    + (f" ({sample}{'…' if len(selectable) > 4 else ''})" if sample else "")
+                    + (f" ({sample}{'…' if len(alertable) > 4 else ''})" if sample else "")
                     + ". Tap BOOK NOW."
                 )
             notify(topic, title, msg, st.url, dry_run, showtime_id=st.showtime_id,
@@ -647,13 +685,24 @@ def poll_seats_and_alert(
                 )
                 notify(topic, title, msg, st.url, dry_run, showtime_id=st.showtime_id,
                        signature=best["signature"])
+            elif newly_selectable:
+                sample = ", ".join(s.label for s in newly_selectable[:4])
+                title = f"SEAT OPENED: {movie_cfg['short_name']}"
+                msg = (
+                    f"{format_showtime(st.iso, tz)} — {sample} just became selectable"
+                    + (f" (+{len(newly_selectable) - 4} more)" if len(newly_selectable) > 4 else "")
+                    + ". Tap BOOK NOW."
+                )
+                notify(topic, title, msg, st.url, dry_run, showtime_id=st.showtime_id)
 
         movie_state["seat_snapshots"][st.showtime_id] = current
-        movie_state.setdefault("verified_inventory", {})[st.showtime_id] = verified_inventory
+        movie_state["selectable_snapshots"][st.showtime_id] = current_selectable
+        movie_state["verified_inventory"][st.showtime_id] = verified_inventory
         movie_state.setdefault("seat_checked_at", {})[st.showtime_id] = utcnow().isoformat()
         movie_state["pending_seat_checks"] = [sid for sid in movie_state.get("pending_seat_checks", []) if sid != st.showtime_id]
     movie_state["seat_maps_checked_this_run"] = len(selected)
     movie_state["selectable_seats_this_run"] = available_count
+    movie_state["alertable_seats_this_run"] = alertable_count
     movie_state["preferred_blocks_this_run"] = preferred_count
 
 
@@ -662,6 +711,7 @@ def prune(movie_state: dict, today: date) -> None:
     for sid in expired:
         movie_state["showtimes"].pop(sid, None)
         movie_state.get("seat_snapshots", {}).pop(sid, None)
+        movie_state.get("selectable_snapshots", {}).pop(sid, None)
         movie_state.get("verified_inventory", {}).pop(sid, None)
         movie_state.get("seat_checked_at", {}).pop(sid, None)
     movie_state["pending_seat_checks"] = [sid for sid in movie_state.get("pending_seat_checks", []) if sid not in expired]
@@ -726,6 +776,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
                 "initialized": False,
                 "showtimes": {},
                 "seat_snapshots": {},
+                "selectable_snapshots": {},
                 "verified_inventory": {},
                 "seat_poll_cursor": 0,
                 "date_probe_cursor": 0,
@@ -744,6 +795,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
         # Migration-friendly defaults for an existing v1 state.json.
         movie_state.setdefault("showtimes", {})
         movie_state.setdefault("seat_snapshots", {})
+        movie_state.setdefault("selectable_snapshots", {})
         movie_state.setdefault("verified_inventory", {})
         movie_state.setdefault("seat_poll_cursor", 0)
         movie_state.setdefault("date_probe_cursor", 0)
@@ -751,6 +803,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
             a["showtime_id"] for a in state["outbox"]
             if a.get("movie_id") == mid and a.get("showtime_id")
         })
+        seed_configured_showtimes(movie_cfg, movie_state, theater)
         prune(movie_state, today)
 
         try:
@@ -771,6 +824,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
                 "date_pages_checked": len(movie_state["date_observations"]),
                 "seat_maps_checked": movie_state.get("seat_maps_checked_this_run", 0),
                 "selectable_seats": movie_state.get("selectable_seats_this_run", 0),
+                "alertable_seats": movie_state.get("alertable_seats_this_run", 0),
                 "preferred_blocks": movie_state.get("preferred_blocks_this_run", 0),
                 "known_showtimes": len(movie_state["showtimes"]),
                 "alerts_queued": len(staged_alerts),
@@ -846,7 +900,9 @@ def flush_outbox(state: dict, persist, topic: str, dry_run: bool = False, delive
                 continue
         publish_ntfy(topic, alert["title"], alert["message"], alert["url"], dry_run)
         if not dry_run:
-            if delivery is not None:
+            if alert.get("kind") == "daily_status":
+                state["last_daily_status_date"] = alert["daily_status_date"]
+            elif delivery is not None:
                 mid = alert.get("movie_id", "unknown")
                 delivery[mid] = delivery.get(mid, 0) + 1
             state["outbox"].remove(alert)
@@ -859,7 +915,13 @@ def flush_outbox(state: dict, persist, topic: str, dry_run: bool = False, delive
     return delivered
 
 
-def status_lines(config: dict, result: dict, delivery: dict | None = None, dry_run: bool = False) -> list[str]:
+def status_lines(
+    config: dict,
+    result: dict,
+    delivery: dict | None = None,
+    dry_run: bool = False,
+    include_notification: bool = True,
+) -> list[str]:
     """Human audit lines. Never invent availability or notification delivery."""
     delivery = delivery or {}
     tz = ZoneInfo(config["theater"]["timezone"])
@@ -876,7 +938,9 @@ def status_lines(config: dict, result: dict, delivery: dict | None = None, dry_r
                             "initializing": "BASELINE IN PROGRESS"}.get(status, "CHECK FAILED: availability unknown")
         elif observed.get("seat_maps_checked", 0):
             if observed.get("selectable_seats", 0):
+                alertable = observed.get("alertable_seats", observed["selectable_seats"])
                 availability = (f"tickets available ({observed['selectable_seats']} selectable seats, "
+                                f"{alertable} alert-eligible seats, "
                                 f"{observed.get('preferred_blocks', 0)} preferred seat blocks across "
                                 f"{observed['seat_maps_checked']} checked showtimes)")
             else:
@@ -887,6 +951,9 @@ def status_lines(config: dict, result: dict, delivery: dict | None = None, dry_r
             availability = "tickets not listed: requested dates not published in theater calendar"
         else:
             availability = "no matching showtimes found on checked dates"
+        if not include_notification:
+            lines.append(f"{prefix} — {availability}")
+            continue
         if dry_run:
             notification = "DRY RUN — no notification sent"
         elif delivery.get(mid, 0):
@@ -899,6 +966,43 @@ def status_lines(config: dict, result: dict, delivery: dict | None = None, dry_r
             notification = "no notification sent"
         lines.append(f"{prefix} — {availability} — {notification}")
     return lines
+
+
+def queue_daily_status(
+    config: dict,
+    state: dict,
+    result: dict,
+    dry_run: bool = False,
+    now: datetime | None = None,
+) -> bool:
+    """Queue one honest local-day status after the configured notification time."""
+    if dry_run or not result.get("movies"):
+        return False
+    tz = ZoneInfo(config["theater"]["timezone"])
+    local_now = (now or utcnow()).astimezone(tz)
+    after = config.get("polling", {}).get("daily_status_after")
+    if not after:
+        return False
+    try:
+        threshold = datetime.strptime(after, "%H:%M").time()
+    except ValueError as exc:
+        raise ScanError("polling.daily_status_after must use HH:MM") from exc
+    day = local_now.date().isoformat()
+    if local_now.time() < threshold or state.get("last_daily_status_date") == day:
+        return False
+    if any(a.get("kind") == "daily_status" and a.get("daily_status_date") == day
+           for a in state.get("outbox", [])):
+        return False
+    state.setdefault("outbox", []).append({
+        "id": f"daily-status:{day}",
+        "kind": "daily_status",
+        "daily_status_date": day,
+        "title": "Daily IMAX ticket status",
+        "message": "\n".join(status_lines(config, result, include_notification=False)),
+        "url": f"{BASE}/theatres/{config['theater']['slug']}",
+        "created_at": (now or utcnow()).isoformat(),
+    })
+    return True
 
 
 def test_notify(config: dict) -> None:
@@ -929,6 +1033,7 @@ def main() -> int:
     try:
         result = run_once(config, state, dry_run=args.dry_run)
         persist = (lambda obj: None) if args.dry_run else (lambda obj: save_json(STATE_PATH, obj))
+        queue_daily_status(config, state, result, args.dry_run)
         persist(state)
         delivery = {}
         try:
