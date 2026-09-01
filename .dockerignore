@@ -1,0 +1,7 @@
+**
+!Dockerfile
+!requirements.txt
+!watcher.py
+!cloud_service.py
+!state_store.py
+!config.json

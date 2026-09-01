@@ -1,0 +1,6 @@
+name = "imax-watcher-scheduler"
+main = "worker.js"
+compatibility_date = "2026-08-31"
+
+[triggers]
+crons = ["*/10 * * * *"]
