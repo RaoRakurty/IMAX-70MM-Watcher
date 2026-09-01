@@ -1,24 +1,24 @@
 {
   "last_daily_status_date": "2026-09-01",
   "last_scan": {
-    "finished_at": "2026-09-01T16:52:49.016320+00:00",
+    "finished_at": "2026-09-01T17:03:25.487317+00:00",
     "movies": {
       "104867": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-01T16:52:02.898686+00:00",
+        "checked_at": "2026-09-01T17:02:35.983886+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 0,
         "known_showtimes": 86,
         "preferred_blocks": 0,
         "seat_maps_checked": 8,
-        "selectable_seats": 221,
+        "selectable_seats": 218,
         "status": "success"
       },
       "109913": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-01T16:52:49.016308+00:00",
+        "checked_at": "2026-09-01T17:03:25.487305+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "known_showtimes": 1,
@@ -29,11 +29,11 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-01T16:50:25.696780+00:00",
+    "started_at": "2026-09-01T17:00:54.865246+00:00",
     "status": "success",
     "status_lines": [
-      "2026-09-01 11:52:02 AM CDT \u2014 ODYSSEY \u2014 tickets available (221 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 8 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
-      "2026-09-01 11:52:49 AM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-01 12:02:35 PM CDT \u2014 ODYSSEY \u2014 tickets available (218 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 8 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
+      "2026-09-01 12:03:25 PM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -66,33 +66,33 @@
       "last_attempt": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-01T16:52:02.898686+00:00",
+        "checked_at": "2026-09-01T17:02:35.983886+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 0,
         "known_showtimes": 86,
         "preferred_blocks": 0,
         "seat_maps_checked": 8,
-        "selectable_seats": 221,
+        "selectable_seats": 218,
         "status": "success"
       },
-      "last_success_at": "2026-09-01T16:52:02.898686+00:00",
+      "last_success_at": "2026-09-01T17:02:35.983886+00:00",
       "pending_notification_checks": [],
       "pending_seat_checks": [],
       "preferred_blocks_this_run": 0,
       "seat_checked_at": {
-        "641832": "2026-09-01T16:51:11.728381+00:00",
-        "641833": "2026-09-01T16:51:19.330793+00:00",
-        "641834": "2026-09-01T16:51:26.557764+00:00",
-        "641835": "2026-09-01T16:51:33.665220+00:00",
-        "641836": "2026-09-01T16:51:40.826818+00:00",
-        "641837": "2026-09-01T16:51:48.209938+00:00",
+        "641832": "2026-09-01T17:01:41.786913+00:00",
+        "641833": "2026-09-01T17:01:49.212520+00:00",
+        "641834": "2026-09-01T17:01:57.321316+00:00",
+        "641835": "2026-09-01T17:02:04.473820+00:00",
+        "641836": "2026-09-01T17:02:12.582388+00:00",
+        "641837": "2026-09-01T17:02:20.413217+00:00",
         "641838": "2026-09-01T16:51:55.495791+00:00",
         "641839": "2026-09-01T16:52:02.898434+00:00",
-        "641840": "2026-09-01T16:41:59.773489+00:00",
-        "641841": "2026-09-01T16:42:07.124943+00:00"
+        "641840": "2026-09-01T17:02:28.448103+00:00",
+        "641841": "2026-09-01T17:02:35.983677+00:00"
       },
       "seat_maps_checked_this_run": 8,
-      "seat_poll_cursor": 8,
+      "seat_poll_cursor": 6,
       "seat_snapshots": {
         "641806": [],
         "641827": [],
@@ -111,7 +111,7 @@
         "641840": [],
         "641841": []
       },
-      "selectable_seats_this_run": 221,
+      "selectable_seats_this_run": 218,
       "selectable_snapshots": {
         "641832": [],
         "641833": [],
@@ -598,7 +598,7 @@
       "last_attempt": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-01T16:52:49.016308+00:00",
+        "checked_at": "2026-09-01T17:03:25.487305+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "known_showtimes": 1,
@@ -607,12 +607,12 @@
         "selectable_seats": 2,
         "status": "success"
       },
-      "last_success_at": "2026-09-01T16:52:49.016308+00:00",
+      "last_success_at": "2026-09-01T17:03:25.487305+00:00",
       "pending_notification_checks": [],
       "pending_seat_checks": [],
       "preferred_blocks_this_run": 0,
       "seat_checked_at": {
-        "644486": "2026-09-01T16:52:49.016278+00:00"
+        "644486": "2026-09-01T17:03:25.487276+00:00"
       },
       "seat_maps_checked_this_run": 1,
       "seat_poll_cursor": 0,
