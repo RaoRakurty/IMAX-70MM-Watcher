@@ -13,7 +13,7 @@ ten-minute cadence fixed.** The earlier Google Cloud implementation remains in
 the repository as an optional alternative, documented in `DEPLOYMENT.md`.
 
 Failed, skipped/backoff, incomplete, or unparseable checks now exit nonzero.
-Health is sent only after validated observations for both movies and durable
+Health is sent only after validated observations for all active movies and durable
 state/notification processing. Manual runs and ntfy tests never count as
 scheduler proof. A signed HMAC binds each automatic run to its UTC ten-minute
 slot, and stale or forged dispatches fail before scanning.
@@ -32,8 +32,10 @@ It does **not** log in, hold seats, click checkout, or purchase tickets.
 The high-value event is usually a newly released batch. Instead of hammering every seat map all day, the watcher:
 
 1. Baselines the current known showtimes silently on its first run.
-2. Rotates through each movie's active 30-day window in five-date batches.
-3. Advances that window by 15 days every 15 days, retaining a 15-day overlap.
+2. Checks Dune first, with up to five date pages and 20 seat maps per run;
+   Odyssey uses at most two date pages and four seat maps.
+3. Advances Dune's 30-day window by 15 days every 15 days; Odyssey has an
+   inclusive September 17, 2026 cutoff.
 4. Always inspects a newly discovered showtime once, so the first ntfy alert can tell you the best preferred seat immediately.
 
 GitHub's native cron previously showed multi-hour delays. The replacement uses
@@ -89,16 +91,25 @@ For stricter center seats, lower `center_tolerance` (for example `0.35`). For a 
 
 ### Odyssey
 
-The first window starts immediately on **Sep 1, 2026** and covers through
-**Sep 30, 2026**. On Sep 16 it advances to Sep 16 through Oct 15.
+Only showtimes through **Sep 17, 2026**, inclusive in Dallas local time, are
+monitored. Each ten-minute run checks at most **two date pages and four seat
+maps**, after Dune. The `monitoring_end` limit applies to discovery, cached
+showtimes, and queued alerts, so the rolling window cannot extend past it.
+After September 17, Odyssey is reported as **monitoring ended** and makes no
+requests; Dune continues and can still produce a healthy completed run.
 
 ### Dune: Part Three
 
 The first window starts exactly on **Dec 17, 2026** and covers through
 **Jan 15, 2027**. On Jan 1 it advances to Jan 1 through Jan 30. Date discovery
-checks at most five pages per run, while known showtimes are cached and their
-seat maps remain in a paced rotation of at most 20 maps per movie per run. The
-configured Dec 17, 3:15 PM Dune showtime is pinned into every natural run.
+checks at most **five pages per run**, with up to **20 seat maps**. Dune runs
+first in every ten-minute cycle. The configured **Dec 17, 3:15 PM** showtime
+is the first seat map checked, including when many new showtimes appear.
+
+Requests retain six-second pacing and the existing global Cinemark 403/429
+backoff. Prioritizing Dune does not bypass an active site backoff. The reduced
+Odyssey allowance lowers request volume, with slower rotation across its
+eligible showtimes.
 
 ## Notification examples
 
@@ -113,7 +124,7 @@ unless it meets the configured new-showtime/opening rules.
 New batch/showtime:
 
 > **NEW ODYSSEY IMAX 70MM**  
-> Fri Sep 18, 7:15 PM — best preferred seat: H14. Tap BOOK NOW.
+> Thu Sep 17, 7:15 PM — best preferred seat: H14. Tap BOOK NOW.
 
 Cancellation/opening:
 
