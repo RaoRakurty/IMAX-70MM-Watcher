@@ -1,39 +1,63 @@
 window.QUESTION_BANK = window.QUESTION_BANK || [];
 window.QUESTION_BANK.push(
 {
-  "id": "D1","topic": "Data Analysis & Statistics","cognitive": "nonroutine","type": "choice","stem": "A group contains equal numbers of people aged 22, 30, and 38. One 30-year-old person leaves the group. Compared with the original group, the standard deviation of the ages of the remaining people is","choices": ["greater","less","the same","impossible to determine"],"answer": 0,"explanation": "The mean remains 30, but a value exactly at the mean is removed while the values 8 units from the mean remain. The ages are therefore more spread out relative to the group size.","stimulusHtml": ""
+  "id":"U21","topic":"Data Analysis & Statistics","cognitive":"nonroutine","type":"choice",
+  "stem":"Arrange the following data sets by standard deviation, from smallest to largest: I. {100, 107, 107, 107, 107, 114}; II. {1000, 1002, 1004, 1006, 1008, 1010}; III. {20, 20, 20, 30, 30, 30}.",
+  "choices":["III, II, I","I, III, II","I, II, III","II, I, III"],
+  "answer":3,"explanation":"The approximate population standard deviations are II = 3.42, I = 4.04, and III = 5.00, so the order is II, I, III.","stimulusHtml":""
 },
 {
-  "id": "D2","topic": "Data Analysis & Statistics","cognitive": "routine","type": "numeric","stem": "On an exam, the mean score for a class was 74.3 points. The instructor rescored the exam by adding 5 points to every student's score. What was the mean of the rescored exam?","answer": 79.3,"tolerance": 1e-09,"suffix": "","explanation": "Adding the same constant to every observation adds that constant to the mean: 74.3 + 5 = 79.3.","stimulusHtml": ""
+  "id":"U22","topic":"Geometry","cognitive":"routine","type":"choice",
+  "stem":"A triangle has a base of 13 units and a perpendicular height of 10 units. What is its area?",
+  "choices":["60","65","120","130"],
+  "answer":1,"explanation":"Area = 1/2(base)(height) = 1/2(13)(10) = 65 square units.","stimulusHtml":""
 },
 {
-  "id": "D3","topic": "Data Analysis & Statistics","cognitive": "nonroutine","type": "choice","stem": "In a course, 8 students had an average score of 72, 12 students had an average score of 84, and 10 students had an average score of 90. What was the average score for all 30 students?","choices": ["80.0","82.0","82.8","84.0"],"answer": 2,"explanation": "Use a weighted mean: [8(72)+12(84)+10(90)]/30 = 2484/30 = 82.8.","stimulusHtml": ""
+  "id":"U23","topic":"Numbers","cognitive":"nonroutine","type":"choice",
+  "stem":"In the British monetary system, $1 = 0.67 pounds. Also, 1 liter = 0.26 gallon. If gasoline costs $3 per gallon, approximately how much does it cost in pounds per liter?",
+  "choices":["£0.17 per liter","£0.52 per liter","£1.29 per liter","£2.01 per liter"],
+  "answer":1,"explanation":"$3/gal × 0.67 pounds/$ × 0.26 gal/L = 0.5226 pounds/L, about £0.52 per liter.","stimulusHtml":""
 },
 {
-  "id": "D4","topic": "Data Analysis & Statistics","cognitive": "nonroutine","type": "choice","stem": "The four data sets below have the same mean. Which data set has the least standard deviation?","choices": ["70, 70, 80, 80, 90, 90","76, 78, 79, 81, 82, 84","60, 70, 80, 80, 90, 100","50, 70, 80, 80, 90, 110"],"answer": 1,"explanation": "Standard deviation measures spread. The second set is clustered most tightly around the common mean.","stimulusHtml": ""
+  "id":"A01","topic":"Logic & Sets","cognitive":"nonroutine","type":"choice",
+  "stem":"Let L = {1,2,3,4}, M = {3,4,5}, and P = {1,2,5}. Which statement is NOT true?",
+  "choices":["L ∩ M = {3,4}","L ∪ P = {1,2,3,4,5}","M ∩ P = {2,5}","(L ∪ M) ∩ P = P"],
+  "answer":2,"explanation":"M and P have only 5 in common, so M ∩ P = {5}. Therefore the statement M ∩ P = {2,5} is false.","stimulusHtml":""
 },
 {
-  "id": "D5","topic": "Data Analysis & Statistics","cognitive": "routine","type": "choice","stem": "A large set of measurements is approximately normally distributed with mean 100 and standard deviation 15. Which statement is most consistent with this information?","choices": ["Values near 100 occur more frequently than values far from 100.","Exactly half of the measurements equal 100.","No measurement is less than 85.","The distribution must have two peaks."],"answer": 0,"explanation": "A normal distribution is centered at its mean and has the greatest concentration of observations near the center.","stimulusHtml": ""
+  "id":"A02","topic":"Numbers","cognitive":"routine","type":"choice",
+  "stem":"Which of the following is an irrational number?",
+  "choices":["√81/3","0.12121212…","√20/2","π/π"],
+  "answer":2,"explanation":"√20/2 = √5, which is irrational. The other values simplify to rational numbers.","stimulusHtml":""
 },
 {
-  "id": "D6","topic": "Data Analysis & Statistics","cognitive": "routine","type": "choice","stem": "The annual salaries at a small company include many salaries between $45,000 and $80,000 and one salary of $600,000. Which measure is generally more appropriate for describing a typical salary at the company?","choices": ["Mean, because it is increased by the highest salary","Median, because it is less affected by the highest salary","Range, because it uses only the highest and lowest salaries","Standard deviation, because it is always the middle value"],"answer": 1,"explanation": "The median is resistant to an extreme high outlier, whereas the mean can be pulled upward substantially.","stimulusHtml": ""
+  "id":"A03","topic":"Geometry","cognitive":"routine","type":"choice",
+  "stem":"In triangle ABC, point X lies on side BC and BX = XC. Segment AX is drawn. Which of the following best describes AX?",
+  "choices":["Altitude","Median","Angle bisector","Midline"],
+  "answer":1,"explanation":"Since X is the midpoint of BC, the segment from vertex A to X is a median.","stimulusHtml":""
 },
 {
-  "id": "D7","topic": "Data Analysis & Statistics","cognitive": "routine","type": "numeric","stem": "The table shows the number of books read by 15 students during one month. What is the median number of books read?","answer": 2,"tolerance": 1e-06,"suffix": "","explanation": "The median is the 8th value. Positions 1-2 are 0, 3-7 are 1, and positions 8-11 are 2, so the median is 2.","stimulusHtml": "\n<table class=\"data-table compact\"><caption>Books read last month</caption><thead><tr><th>Books</th><th>Number of students</th></tr></thead>\n<tbody><tr><td>0</td><td>2</td></tr><tr><td>1</td><td>5</td></tr><tr><td>2</td><td>4</td></tr><tr><td>3</td><td>3</td></tr><tr><td>4</td><td>1</td></tr></tbody></table>"
+  "id":"A04","topic":"Logic & Sets","cognitive":"routine","type":"choice",
+  "stem":"Which statement is the converse of: If an integer is divisible by 4, then the integer is even?",
+  "choices":["If an integer is not divisible by 4, then it is not even.","If an integer is even, then it is divisible by 4.","If an integer is odd, then it is not divisible by 4.","If an integer is not even, then it is divisible by 4."],
+  "answer":1,"explanation":"The converse swaps hypothesis and conclusion: If an integer is even, then it is divisible by 4.","stimulusHtml":""
 },
 {
-  "id": "D8","topic": "Data Analysis & Statistics","cognitive": "nonroutine","type": "choice","stem": "The graph shows the closing price of one share of stock for five business days. Which of the following is closest to the percent change in the closing price from Tuesday to Wednesday?","choices": ["33%","40%","50%","67%"],"answer": 2,"explanation": "The price rises from $16 to $24, an increase of $8. Relative to Tuesday's $16 price, 8/16 = 50%.","stimulusHtml": "\n<svg class=\"mini-chart\" viewBox=\"0 0 440 230\" role=\"img\" aria-label=\"Line graph of closing price by day. Monday 22, Tuesday 16, Wednesday 24, Thursday 20, Friday 26 dollars.\">\n  <line x1=\"52\" y1=\"20\" x2=\"52\" y2=\"185\" class=\"axis\"/><line x1=\"52\" y1=\"185\" x2=\"420\" y2=\"185\" class=\"axis\"/>\n  <g class=\"gridlines\"><line x1=\"52\" y1=\"155\" x2=\"420\" y2=\"155\"/><line x1=\"52\" y1=\"125\" x2=\"420\" y2=\"125\"/><line x1=\"52\" y1=\"95\" x2=\"420\" y2=\"95\"/><line x1=\"52\" y1=\"65\" x2=\"420\" y2=\"65\"/><line x1=\"52\" y1=\"35\" x2=\"420\" y2=\"35\"/></g>\n  <g class=\"labels\"><text x=\"18\" y=\"160\">14</text><text x=\"18\" y=\"130\">18</text><text x=\"18\" y=\"100\">22</text><text x=\"18\" y=\"70\">26</text><text x=\"18\" y=\"40\">30</text><text x=\"72\" y=\"210\">Mon</text><text x=\"148\" y=\"210\">Tue</text><text x=\"223\" y=\"210\">Wed</text><text x=\"300\" y=\"210\">Thu</text><text x=\"374\" y=\"210\">Fri</text></g>\n  <polyline points=\"88,95 164,140 240,80 316,110 392,65\" class=\"series\"/>\n  <g class=\"points\"><circle cx=\"88\" cy=\"95\" r=\"4\"/><circle cx=\"164\" cy=\"140\" r=\"4\"/><circle cx=\"240\" cy=\"80\" r=\"4\"/><circle cx=\"316\" cy=\"110\" r=\"4\"/><circle cx=\"392\" cy=\"65\" r=\"4\"/></g>\n  <text x=\"8\" y=\"15\" class=\"chart-title\">Closing price per share (dollars)</text>\n</svg>"
+  "id":"A05","topic":"Financial Mathematics","cognitive":"nonroutine","type":"choice",
+  "stem":"Which investment produces the greatest amount after 5 years on an initial investment of $1,000?",
+  "choices":["3.6% APR compounded annually","3.5% APR compounded daily","3.4% APR compounded continuously","3.9% simple interest"],
+  "answer":3,"explanation":"The approximate ending values are $1,193.44, $1,191.24, $1,185.30, and $1,195.00. The simple-interest option is greatest.","stimulusHtml":""
 },
 {
-  "id": "D9","topic": "Data Analysis & Statistics","cognitive": "routine","type": "choice","stem": "Data set B is formed by multiplying every value in data set A by 2.5. If the standard deviation of data set A is 4.8, what is the standard deviation of data set B?","choices": ["4.8","7.3","12.0","19.2"],"answer": 2,"explanation": "Multiplying every data value by 2.5 multiplies the standard deviation by |2.5|: 4.8(2.5)=12.0.","stimulusHtml": ""
+  "id":"A06","topic":"Data Analysis & Statistics","cognitive":"nonroutine","type":"choice",
+  "stem":"Five points in a scatterplot lie approximately on y = x for x-values between 2 and 6, giving a strong positive association. A new point (1,5) is added. Which best describes the effect?",
+  "choices":["Stronger association and steeper regression line","Weaker association and steeper regression line","Stronger association and shallower regression line","Weaker association and shallower regression line"],
+  "answer":3,"explanation":"The new point is far from the existing linear pattern, weakening the association. Because it is high at a small x-value, it tends to make the positive regression slope shallower.","stimulusHtml":""
 },
 {
-  "id": "L1","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "If a file is encrypted, then the file is protected from casual reading. Which of the following is logically equivalent to the statement above?","choices": ["If a file is protected from casual reading, then it is encrypted.","If a file is not encrypted, then it is not protected from casual reading.","If a file is not protected from casual reading, then it is not encrypted.","If a file is encrypted, then it is not protected from casual reading."],"answer": 2,"explanation": "The contrapositive of 'If P, then Q' is 'If not Q, then not P,' and the two are logically equivalent.","stimulusHtml": ""
-},
-{
-  "id": "L2","topic": "Logic & Sets","cognitive": "nonroutine","type": "choice","stem": "Some students in a school debate club are seniors, and all members of the debate club take a public-speaking course. Which of the following is a valid conclusion?","choices": ["All seniors take the public-speaking course.","Some seniors take the public-speaking course.","Some students who take public speaking are not in the debate club.","No juniors take the public-speaking course."],"answer": 1,"explanation": "At least one debate-club member is a senior, and every debate-club member takes public speaking. Therefore at least one senior takes public speaking.","stimulusHtml": ""
-},
-{
-  "id": "L3","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Let U be a nonempty set, and let B and C be any two subsets of U. Which of the following statements must be true?","choices": ["B ∪ C = U","B ∩ C = ∅","B ∪ C ⊆ U","U ⊆ B ∩ C"],"answer": 2,"explanation": "Every element of B and every element of C is in U, so every element of B ∪ C is in U.","stimulusHtml": ""
+  "id":"A07","topic":"Algebra & Functions","cognitive":"routine","type":"choice",
+  "stem":"For which function does reflection of the graph about the y-axis produce exactly the original graph?",
+  "choices":["f(x)=x⁴+2x²","f(x)=x³+2","f(x)=x²+x","f(x)=|x−2|"],
+  "answer":0,"explanation":"An unchanged y-axis reflection requires an even function. x⁴ + 2x² contains only even powers, so f(−x)=f(x).","stimulusHtml":""
 }
 );
