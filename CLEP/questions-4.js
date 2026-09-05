@@ -1,39 +1,62 @@
 window.QUESTION_BANK = window.QUESTION_BANK || [];
 window.QUESTION_BANK.push(
 {
-  "id": "L4","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Set A contains 58 elements and set B contains 44 elements. If 19 elements are in both A and B, how many elements are in A ∪ B?","choices": ["63","83","102","121"],"answer": 1,"explanation": "Use n(A∪B)=n(A)+n(B)-n(A∩B)=58+44-19=83.","stimulusHtml": ""
+  "id":"A08","topic":"Data Analysis & Statistics","cognitive":"routine","type":"choice",
+  "stem":"Which type of distribution would generally have mean < median?",
+  "choices":["A symmetric bell-shaped distribution","A distribution with a long tail extending to the left","A distribution with a long tail extending to the right","A perfectly uniform distribution"],
+  "answer":1,"explanation":"A long left tail pulls the mean downward, so for a negatively skewed distribution the mean is generally less than the median.","stimulusHtml":""
 },
 {
-  "id": "L5","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Let A = {r, s, t} and B = {1, 2}. Which of the following ordered pairs is NOT in A × B?","choices": ["(r, 1)","(t, 2)","(s, 1)","(1, r)"],"answer": 3,"explanation": "In A × B, the first coordinate must be from A and the second from B. (1,r) reverses the order.","stimulusHtml": ""
+  "id":"A09","topic":"Logic & Sets","cognitive":"nonroutine","type":"choice",
+  "stem":"Let P be false, Q be true, and R be false. Which statement is true?",
+  "choices":["(P or R) and Q","(not P) and (Q or R)","(Q implies P) or R","Q and (P or R)"],
+  "answer":1,"explanation":"not P is true and Q or R is true, so their conjunction is true.","stimulusHtml":""
 },
 {
-  "id": "L6","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Which of the following is the negation of the statement 'Every application was approved'?","choices": ["No application was approved.","At least one application was not approved.","Every application was rejected.","At least one application was approved."],"answer": 1,"explanation": "The negation of 'every A has property P' is 'at least one A does not have property P.'","stimulusHtml": ""
+  "id":"A10","topic":"Logic & Sets","cognitive":"routine","type":"choice",
+  "stem":"Let S = {a,b,c,d}. Not counting the empty set, how many proper subsets does S have?",
+  "choices":["12","13","14","15"],
+  "answer":2,"explanation":"A 4-element set has 2⁴ = 16 subsets. Excluding the empty set and S itself leaves 14 proper nonempty subsets.","stimulusHtml":""
 },
 {
-  "id": "L7","topic": "Logic & Sets","cognitive": "nonroutine","type": "choice","stem": "A student asserted that x² + 1 is greater than 2x for every real number x. Which of the following values of x provides a counterexample to the student's claim?","choices": ["-1","0","1","2"],"answer": 2,"explanation": "At x=1, x²+1=2 and 2x=2, so the strict inequality is false.","stimulusHtml": ""
+  "id":"A11","topic":"Data Analysis & Statistics","cognitive":"routine","type":"choice",
+  "stem":"The speeds of 12,500 vehicles are approximately normally distributed with a mean of 72 mph and a standard deviation of 4 mph. Approximately how many vehicles were traveling faster than 76 mph?",
+  "choices":["625","2,000","4,250","6,250"],
+  "answer":1,"explanation":"76 mph is 1 standard deviation above the mean. About 16% of a normal distribution lies above +1 standard deviation. 0.16(12,500) ≈ 2,000.","stimulusHtml":""
 },
 {
-  "id": "L8","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Let R = {x | x > -2} and S = {x | x ≤ 3}. How many integers are in R ∩ S?","choices": ["4","5","6","7"],"answer": 1,"explanation": "The integers satisfying -2 < x ≤ 3 are -1, 0, 1, 2, and 3: five integers.","stimulusHtml": ""
+  "id":"A12","topic":"Financial Mathematics","cognitive":"nonroutine","type":"choice",
+  "stem":"A person invests $1.6 million equally between two banks. Bank A pays 3.20% annual interest compounded daily. Bank B pays 3.24% annual interest compounded quarterly. Approximately how much more interest will the better-performing account earn during the first year?",
+  "choices":["$0","$224","$480","$1,920"],
+  "answer":1,"explanation":"Each account receives $800,000. The first-year balances differ by about $223.79, so the closest choice is $224.","stimulusHtml":""
 },
 {
-  "id": "L9","topic": "Logic & Sets","cognitive": "routine","type": "choice","stem": "Which of the following is logically equivalent to the statement 'It is not true that both P and Q are true'?","choices": ["not P and not Q","not P or not Q","P or Q","P and not Q"],"answer": 1,"explanation": "By De Morgan's law, not(P and Q) is equivalent to (not P) or (not Q).","stimulusHtml": ""
+  "id":"A13","topic":"Financial Mathematics","cognitive":"nonroutine","type":"numeric",
+  "stem":"An investment will be worth $100,000 in 60 years. If it earns 4.8% annual interest compounded quarterly, approximately what amount must be invested today? Round to the nearest dollar.",
+  "answer":5711,"tolerance":1,"suffix":"dollars","explanation":"PV = 100,000/(1 + 0.048/4)^(60·4) ≈ $5,710.54, which rounds to $5,711.","stimulusHtml":""
 },
 {
-  "id": "P1","topic": "Counting & Probability","cognitive": "routine","type": "choice","stem": "A cafeteria offers 4 entrees, 3 side dishes, 2 desserts, and 2 drinks. If a meal consists of one item from each category, how many different meals are possible?","choices": ["11","24","48","96"],"answer": 2,"explanation": "Use the multiplication principle: 4·3·2·2 = 48.","stimulusHtml": ""
+  "id":"A14","topic":"Numbers","cognitive":"routine","type":"choice",
+  "stem":"Consider the six numbers π, √49, √18, 0.272727…, 11/4, and e. How many are irrational?",
+  "choices":["1","2","3","4"],
+  "answer":2,"explanation":"π, √18, and e are irrational. √49, the repeating decimal, and 11/4 are rational, so the answer is 3.","stimulusHtml":""
 },
 {
-  "id": "P2","topic": "Counting & Probability","cognitive": "nonroutine","type": "choice","stem": "A committee is to consist of 2 faculty members chosen from 7 faculty members and 3 students chosen from 9 students. How many different committees can be formed?","choices": ["252","756","1,764","3,024"],"answer": 2,"explanation": "Choose independently: C(7,2)·C(9,3)=21·84=1,764.","stimulusHtml": ""
+  "id":"A15","topic":"Geometry","cognitive":"nonroutine","type":"choice",
+  "stem":"A right isosceles triangle is inscribed in a semicircle so that its hypotenuse is the diameter. The hypotenuse has length 8. The portion of the semicircle outside the triangle is shaded. What is the shaded area?",
+  "choices":["8π − 8","8π − 16","16π − 16","16π − 32"],
+  "answer":1,"explanation":"The semicircle has radius 4 and area 8π. The isosceles right triangle has legs 4√2 and area 16. Shaded area = 8π − 16.","stimulusHtml":""
 },
 {
-  "id": "P3","topic": "Counting & Probability","cognitive": "routine","type": "choice","stem": "Seven finalists are available for the positions of president, vice president, and secretary. No person may hold more than one position. How many different assignments of the three positions are possible?","choices": ["35","105","210","343"],"answer": 2,"explanation": "Order matters: 7 choices for president, then 6, then 5. Thus 7·6·5=210.","stimulusHtml": ""
+  "id":"A16","topic":"Geometry","cognitive":"routine","type":"choice",
+  "stem":"One exterior angle is formed at each vertex of a triangle. If the three exterior angles are a, b, and c, what is a + b + c?",
+  "choices":["90°","180°","360°","540°"],
+  "answer":2,"explanation":"The sum of one exterior angle at each vertex of any convex polygon is 360°.","stimulusHtml":""
 },
 {
-  "id": "P4","topic": "Counting & Probability","cognitive": "nonroutine","type": "choice","stem": "A fair six-sided die is rolled twice. What is the probability that the first roll is a multiple of 3 or the second roll is 5?","choices": ["1/3","4/9","1/2","5/9"],"answer": 1,"explanation": "P(first multiple of 3)=2/6=1/3. P(second is 5)=1/6. Subtract overlap 1/18: 1/3+1/6-1/18=4/9.","stimulusHtml": ""
-},
-{
-  "id": "P5","topic": "Counting & Probability","cognitive": "routine","type": "choice","stem": "In a large group of employees, 40 percent are at least 30 years old and 30 percent hold a certain certification. Age and certification status are independent. What is the probability that a randomly selected employee is at least 30 years old and holds the certification?","choices": ["0.12","0.28","0.58","0.70"],"answer": 0,"explanation": "For independent events, multiply: 0.40·0.30=0.12.","stimulusHtml": ""
-},
-{
-  "id": "P6","topic": "Counting & Probability","cognitive": "nonroutine","type": "choice","stem": "A box contains 9 white cards and 6 black cards. One card is selected at random and not replaced. If the first card selected was white, what is the probability that the second card selected will be black?","choices": ["2/5","3/7","6/15","9/14"],"answer": 1,"explanation": "After a white card is removed, 14 cards remain, including all 6 black cards. The probability is 6/14=3/7.","stimulusHtml": ""
+  "id":"A17","topic":"Numbers","cognitive":"routine","type":"choice",
+  "stem":"Write the value of (4.8 × 10⁻³)/(1.2 × 10⁻⁵) in standard notation.",
+  "choices":["4","40","400","4,000"],
+  "answer":2,"explanation":"4.8/1.2 = 4 and 10^(−3−(−5)) = 10², so the value is 4×100 = 400.","stimulusHtml":""
 }
 );
