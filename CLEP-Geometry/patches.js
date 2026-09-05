@@ -9,11 +9,10 @@
       choices: ["180", "240", "270", "306"],
       answer: 2,
       explanation: "Because the trapezoid is isosceles, the difference of the bases, 26 − 10 = 16, is split equally between the two sides. Each horizontal offset is 8. Using a right triangle with hypotenuse 17 gives the height √(17² − 8²) = 15. Therefore the area is (1/2)(10 + 26)(15) = 270.",
-      diagram: { type: "isoscelesTrapezoidDerived", top: "10", bottom: "26", leg: "17", height: "?" }
+      diagram: { type: "trapezoid", b1: "10", b2: "26", h: "?" }
     });
   }
 
-  // Invalidate only pre-fix saved attempts once, so changed question/diagram state does not carry over.
   try {
     const migrationKey = "clep-geometry-diagram-fix-v2";
     if (!localStorage.getItem(migrationKey)) {
