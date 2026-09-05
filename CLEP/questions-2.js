@@ -1,55 +1,62 @@
 window.QUESTION_BANK = window.QUESTION_BANK || [];
 window.QUESTION_BANK.push(
 {
-  "id": "A1",
-  "topic": "Algebra & Functions",
-  "cognitive": "nonroutine",
-  "type": "choice",
-  "stem": "A community center had 2,400 members at the beginning of 2023 and 2,940 members at the beginning of 2026. If the number of members increased linearly, which of the following represents the number M of members t years after the beginning of 2023?",
-  "choices": ["M = 2,400 + 180t","M = 2,400 + 540t","M = 2,940 + 180t","M = 2,940 + 540(t - 3)"],
-  "answer": 0,
-  "explanation": "The increase was 540 over 3 years, or 180 per year. Starting at 2,400 gives M = 2,400 + 180t.",
-  "stimulusHtml": ""
+  "id":"U11","topic":"Data Analysis & Statistics","cognitive":"routine","type":"choice",
+  "stem":"A highway study of 15,000 vehicles found that speeds were approximately normally distributed with a mean of 59 mph and a standard deviation of 6 mph. Approximately how many vehicles had speeds greater than 65 mph?",
+  "choices":["375","2,400","5,100","9,900"],
+  "answer":1,"explanation":"65 mph is 1 standard deviation above the mean. About 16% of a normal distribution lies above +1 standard deviation. 0.16(15,000) ≈ 2,400.","stimulusHtml":""
 },
 {
-  "id": "A2","topic": "Algebra & Functions","cognitive": "routine","type": "choice",
-  "stem": "Values of the functions f and g are shown in the tables. What is the value of f(g(4))?",
-  "choices": ["1","5","7","9"],"answer": 3,
-  "explanation": "From the g table, g(4) = 8. From the f table, f(8) = 9.",
-  "stimulusHtml": "\n<div class=\"stimulus-grid two\">\n<table class=\"data-table\"><caption>Function f</caption><thead><tr><th>x</th><th>f(x)</th></tr></thead>\n<tbody><tr><td>2</td><td>5</td></tr><tr><td>4</td><td>7</td></tr><tr><td>6</td><td>1</td></tr><tr><td>8</td><td>9</td></tr></tbody></table>\n<table class=\"data-table\"><caption>Function g</caption><thead><tr><th>x</th><th>g(x)</th></tr></thead>\n<tbody><tr><td>2</td><td>6</td></tr><tr><td>4</td><td>8</td></tr><tr><td>6</td><td>4</td></tr><tr><td>8</td><td>2</td></tr></tbody></table>\n</div>"
+  "id":"U12","topic":"Financial Mathematics","cognitive":"nonroutine","type":"choice",
+  "stem":"You win $2 million in the lottery. You invest $1 million in Bank M at 3.02% interest compounded daily and $1 million in Bank N at 3.05% interest compounded quarterly. What is the approximate difference between the interest earned after the first year?",
+  "choices":["$0","$192","$264","$300"],
+  "answer":1,"explanation":"Bank M earns about $30,659 and Bank N about $30,851 during the first year, a difference of about $191, closest to $192.","stimulusHtml":""
 },
 {
-  "id": "A3","topic": "Algebra & Functions","cognitive": "nonroutine","type": "choice",
-  "stem": "A researcher recorded the number of cells in a culture at the times shown. Based on the data, which of the following functions best models the number of cells C(t) after t hours?",
-  "choices": ["C(t) = 120 + 60t","C(t) = 120(2^t)","C(t) = 120(2^(t/2))","C(t) = 120t² + 2"],"answer": 2,
-  "explanation": "The population doubles every 2 hours, so the exponent is t/2: C(t) = 120·2^(t/2).",
-  "stimulusHtml": "\n<table class=\"data-table compact\"><caption>Measured population</caption><thead><tr><th>Time t (hours)</th><th>Cells</th></tr></thead>\n<tbody><tr><td>0</td><td>120</td></tr><tr><td>2</td><td>240</td></tr><tr><td>4</td><td>480</td></tr><tr><td>6</td><td>960</td></tr></tbody></table>"
+  "id":"U13","topic":"Financial Mathematics","cognitive":"nonroutine","type":"numeric",
+  "stem":"The future value of an investment 75 years from now will be $75,000. If the money earns 5% annual interest compounded semiannually, what is the present value, rounded to the nearest dollar?",
+  "answer":1847,"tolerance":1,"suffix":"dollars","explanation":"PV = 75,000/(1 + 0.05/2)^(75·2) ≈ $1,847.","stimulusHtml":""
 },
 {
-  "id": "A4","topic": "Algebra & Functions","cognitive": "routine","type": "choice","stem": "The width of a rectangular garden is x feet. If 360 feet of fencing is needed to enclose the garden, which of the following represents the length of the garden, in feet?","choices": ["360 - x","360 - 2x","180 - x","180 - 2x"],"answer": 2,"explanation": "2L + 2x = 360, so L + x = 180 and L = 180 - x.","stimulusHtml": ""
+  "id":"U14","topic":"Numbers","cognitive":"routine","type":"choice",
+  "stem":"Consider the six numbers π, √64, √12, 0.454545…, 7/9, and e. How many of these numbers are irrational?",
+  "choices":["1","2","3","4"],
+  "answer":2,"explanation":"π, √12, and e are irrational. √64 = 8, a repeating decimal, and 7/9 are rational, so there are 3 irrational numbers.","stimulusHtml":""
 },
 {
-  "id": "A5","topic": "Algebra & Functions","cognitive": "routine","type": "choice","stem": "Which of the following is the solution to 7(2^x) = 84?","choices": ["x = ln(12)/ln(2)","x = ln(84)/ln(2)","x = ln(77)/ln(2)","x = ln(12) - ln(2)"],"answer": 0,"explanation": "Divide by 7 to get 2^x = 12. Therefore x = log₂12 = ln(12)/ln(2).","stimulusHtml": ""
+  "id":"U15","topic":"Geometry","cognitive":"nonroutine","type":"choice",
+  "stem":"A right isosceles triangle is inscribed in a semicircle so that its hypotenuse is the diameter. The hypotenuse is 4 units long. The part of the semicircle outside the triangle is shaded. What is the area of the shaded region?",
+  "choices":["2π − 2","2π − 4","4π − 4","4π − 8"],
+  "answer":1,"explanation":"The semicircle has radius 2, so its area is 2π. The isosceles right triangle has legs 2√2, so its area is 1/2(2√2)^2 = 4. Shaded area = 2π − 4.","stimulusHtml":""
 },
 {
-  "id": "A6","topic": "Algebra & Functions","cognitive": "routine","type": "choice","stem": "A manufactured part is acceptable if its mass is from 47.4 grams to 48.6 grams, inclusive. Which of the following inequalities describes all acceptable masses x, in grams?","choices": ["|x - 48| ≤ 0.6","|x - 48| ≥ 0.6","|x - 47.4| ≤ 1.2","|x - 48.6| ≤ 0.6"],"answer": 0,"explanation": "The interval is centered at 48 with maximum distance 0.6, so |x - 48| ≤ 0.6.","stimulusHtml": ""
+  "id":"U16","topic":"Geometry","cognitive":"routine","type":"choice",
+  "stem":"At each vertex of a triangle, one side is extended to form an exterior angle. If the three exterior angles are a, b, and c, what is a + b + c?",
+  "choices":["180°","2a","360°","720°"],
+  "answer":2,"explanation":"The sum of one exterior angle at each vertex of any convex polygon is 360°. In particular, a + b + c = 360°.","stimulusHtml":""
 },
 {
-  "id": "A7","topic": "Algebra & Functions","cognitive": "routine","type": "numeric","stem": "The function f is defined by f(x) = x² + 1 for x < 0 and f(x) = 3x - 2 for x ≥ 0. What is the value of f(-3) + f(4)?","answer": 20,"tolerance": 1e-06,"suffix": "","explanation": "f(-3) = 9 + 1 = 10 and f(4) = 12 - 2 = 10, so the sum is 20.","stimulusHtml": ""
+  "id":"U17","topic":"Numbers","cognitive":"routine","type":"choice",
+  "stem":"Write the value of (6.4 × 10⁻⁴)/(8 × 10⁻⁷) in standard notation.",
+  "choices":["0.8","8","80","800"],
+  "answer":3,"explanation":"(6.4/8)×10^(−4−(−7)) = 0.8×10³ = 800.","stimulusHtml":""
 },
 {
-  "id": "A8","topic": "Algebra & Functions","cognitive": "nonroutine","type": "choice","stem": "The graph of y = f(x) is transformed to obtain the graph of y = f(-x) + 3. Which of the following describes the transformation?","choices": ["Reflect across the x-axis, then shift up 3 units.","Reflect across the y-axis, then shift up 3 units.","Shift left 3 units, then reflect across the y-axis.","Shift right 3 units, then reflect across the x-axis."],"answer": 1,"explanation": "Replacing x by -x reflects the graph across the y-axis. Adding 3 shifts it upward 3 units.","stimulusHtml": ""
+  "id":"U18","topic":"Algebra & Functions","cognitive":"routine","type":"choice",
+  "stem":"The graph of y = f(x) is translated 2 units to the right and 3 units upward. Which equation represents the transformed graph?",
+  "choices":["y = f(x + 2) + 3","y = f(x − 2) + 3","y = f(x + 2) − 3","y = f(x − 2) − 3"],
+  "answer":1,"explanation":"A shift right by 2 replaces x with x − 2. A shift up by 3 adds 3 outside the function.","stimulusHtml":""
 },
 {
-  "id": "A9","topic": "Algebra & Functions","cognitive": "nonroutine","type": "numeric","stem": "The equations x + y = 10, y + z = 15, and z + t = 22 are true. What is the value of x + t?","answer": 17,"tolerance": 1e-06,"suffix": "","explanation": "Add the first and third equations and subtract the second: (x+y)+(z+t)-(y+z)=10+22-15=17.","stimulusHtml": ""
+  "id":"U19","topic":"Counting & Probability","cognitive":"routine","type":"choice",
+  "stem":"In a room of 20 people, if each person shakes hands exactly once with every other person, how many different handshakes are possible?",
+  "choices":["40","190","380","400"],
+  "answer":1,"explanation":"Each handshake is an unordered pair of people: C(20,2) = 20·19/2 = 190.","stimulusHtml":""
 },
 {
-  "id": "A10","topic": "Algebra & Functions","cognitive": "nonroutine","type": "choice","stem": "Let f(x) = 1/(x - 4) and g(x) = 2x + 4. Which of the following is the domain of the composite function f(g(x))?","choices": ["All real numbers","All real numbers except 0","All real numbers except 2","All real numbers except 4"],"answer": 1,"explanation": "f(g(x)) = 1/[(2x+4)-4] = 1/(2x), so x = 0 must be excluded.","stimulusHtml": ""
-},
-{
-  "id": "A11","topic": "Algebra & Functions","cognitive": "nonroutine","type": "choice","stem": "The cost C, in dollars, of a taxi ride is modeled by C = 4.50 + 2.25m, where m is the number of miles traveled. Which of the following best describes the number 2.25 in this model?","choices": ["The fixed charge before any miles are traveled","The number of miles included in the fixed charge","The increase in cost for each additional mile","The total cost of a 2.25-mile ride"],"answer": 2,"explanation": "The coefficient of m is the rate of change: the fare increases $2.25 per mile.","stimulusHtml": ""
-},
-{
-  "id": "A12","topic": "Algebra & Functions","cognitive": "routine","type": "choice","stem": "Which of the following sets of real numbers is the solution set of |2x - 5| ≤ 7?","choices": ["[-1, 6]","[-6, 1]","(-∞, -1] ∪ [6, ∞)","[-1, 1]"],"answer": 0,"explanation": "-7 ≤ 2x - 5 ≤ 7 gives -2 ≤ 2x ≤ 12, so -1 ≤ x ≤ 6.","stimulusHtml": ""
+  "id":"U20","topic":"Algebra & Functions","cognitive":"nonroutine","type":"choice",
+  "stem":"What is the domain of f(x) = √(x − 5)/(x − 7)?",
+  "choices":["[5, 7) ∪ (7, ∞)","(5, 7) ∪ (7, ∞)","[5, ∞)","(7, ∞)"],
+  "answer":0,"explanation":"The square root requires x ≥ 5, while the denominator requires x ≠ 7. Thus the domain is [5,7) ∪ (7,∞).","stimulusHtml":""
 }
 );
