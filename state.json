@@ -2,41 +2,25 @@
   "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641823&CinemarkMovieId=104867&Showtime=2026-09-10T11%3A45%3A00&CnkAction=share",
   "last_daily_status_date": "2026-09-04",
   "last_scan": {
-    "finished_at": "2026-09-05T05:44:11.894920+00:00",
+    "finished_at": "2026-09-05T05:57:19.380822+00:00",
     "movies": {
       "104867": {
-        "alertable_seats": 3,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-05T05:43:25.940175+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 78,
-        "known_showtimes": 140,
-        "preferred_blocks": 1,
-        "seat_maps_checked": 20,
-        "selectable_seats": 331,
-        "status": "success"
+        "error": "Insufficient scan time budget for retry/pacing",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "109913": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-05T05:44:11.894906+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 1,
-        "known_showtimes": 1,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 1,
-        "selectable_seats": 2,
-        "status": "success"
+        "error": "Insufficient scan time budget for retry/pacing",
+        "error_type": "ScanError",
+        "status": "failed"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-05T05:40:22.859715+00:00",
-    "status": "success",
+    "started_at": "2026-09-05T05:50:23.873994+00:00",
+    "status": "failed",
     "status_lines": [
-      "2026-09-05 12:43:25 AM CDT \u2014 ODYSSEY \u2014 tickets available (331 selectable seats, 3 alert-eligible seats, 1 preferred seat blocks across 20 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
-      "2026-09-05 12:44:11 AM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-05 12:57:19 AM CDT \u2014 ODYSSEY \u2014 CHECK FAILED: availability unknown \u2014 no notification sent",
+      "2026-09-05 12:57:19 AM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -102,17 +86,9 @@
       "eligible_showtimes_this_run": 78,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 3,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-05T05:43:25.940175+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 78,
-        "known_showtimes": 140,
-        "preferred_blocks": 1,
-        "seat_maps_checked": 20,
-        "selectable_seats": 331,
-        "status": "success"
+        "error": "Insufficient scan time budget for retry/pacing",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-05T05:43:25.940175+00:00",
       "pending_notification_checks": [],
@@ -3419,17 +3395,9 @@
       "eligible_showtimes_this_run": 1,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-05T05:44:11.894906+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 1,
-        "known_showtimes": 1,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 1,
-        "selectable_seats": 2,
-        "status": "success"
+        "error": "Insufficient scan time budget for retry/pacing",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-05T05:44:11.894906+00:00",
       "pending_notification_checks": [],
