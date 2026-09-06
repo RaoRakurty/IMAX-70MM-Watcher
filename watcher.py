@@ -451,6 +451,17 @@ def known_future_dates(movie_state: dict, today: date) -> list[date]:
     )
 
 
+def monitoring_end(movie_cfg: dict) -> date | None:
+    """Optional inclusive limit on showtime dates, in the theater's timezone."""
+    raw_end = movie_cfg.get("monitoring_end")
+    if not raw_end:
+        return None
+    end = parse_day(str(raw_end))
+    if movie_cfg.get("monitoring_start") and end < parse_day(str(movie_cfg["monitoring_start"])):
+        raise ScanError("monitoring_end must not precede monitoring_start")
+    return end
+
+
 def monitoring_window(movie_cfg: dict, today: date) -> tuple[date, date] | None:
     """Return an inclusive window that advances in fixed overlapping steps."""
     raw_start = movie_cfg.get("monitoring_start")
@@ -463,7 +474,9 @@ def monitoring_window(movie_cfg: dict, today: date) -> tuple[date, date] | None:
         raise ScanError("Monitoring window and shift must be positive, with shift no larger than window")
     elapsed = max((today - base).days, 0)
     start = base + timedelta(days=(elapsed // shift_days) * shift_days)
-    return start, start + timedelta(days=window_days - 1)
+    end = start + timedelta(days=window_days - 1)
+    limit = monitoring_end(movie_cfg)
+    return start, min(end, limit) if limit else end
 
 
 def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> list[date]:
@@ -472,6 +485,9 @@ def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> lis
     Rolling-window configs rotate through the entire active range. Legacy configs
     retain the bootstrap/frontier/probe strategy.
     """
+    limit = monitoring_end(movie_cfg)
+    if limit and today > limit:
+        return []
     window = monitoring_window(movie_cfg, today)
     max_pages = int(movie_cfg.get("max_date_pages_per_run", 5))
     if window:
@@ -482,6 +498,8 @@ def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> lis
         if not movie_state.get("initialized"):
             next_date = parse_day(movie_state.get("bootstrap_next_date", effective_start.isoformat()))
             start = max(effective_start, next_date)
+            if start > window_end:
+                start = effective_start
             return list(daterange(start, window_end))[:max_pages]
 
         candidates = list(daterange(effective_start, window_end))
@@ -497,9 +515,13 @@ def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> lis
     if not movie_state.get("initialized"):
         start = max(today, parse_day(movie_state.get("bootstrap_next_date", movie_cfg["bootstrap_start"])))
         end = parse_day(movie_cfg["bootstrap_end"])
+        if limit:
+            end = min(end, limit)
+            if start > end and today <= end:
+                start = max(today, parse_day(movie_cfg["bootstrap_start"]))
         return list(daterange(start, end))[:max_pages]
 
-    known = known_future_dates(movie_state, today)
+    known = [d for d in known_future_dates(movie_state, today) if not limit or d <= limit]
     if known:
         frontier = max(known)
         lookbehind = int(movie_cfg.get("frontier_lookbehind_days", 1))
@@ -508,6 +530,7 @@ def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> lis
             frontier + timedelta(days=offset)
             for offset in range(-lookbehind, lookahead + 1)
             if frontier + timedelta(days=offset) >= today
+            and (not limit or frontier + timedelta(days=offset) <= limit)
         ]
     else:
         candidates = [
@@ -516,14 +539,14 @@ def scan_dates_for_movie(movie_cfg: dict, movie_state: dict, today: date) -> lis
                 "pre_sale_probe_dates",
                 [movie_cfg.get("bootstrap_start", today.isoformat())],
             )
-            if parse_day(d) >= today
+            if parse_day(d) >= today and (not limit or parse_day(d) <= limit)
         ]
 
     # Optionally rotate extra explicit probe dates without making every run scan them all.
     extras = [
         parse_day(d)
         for d in movie_cfg.get("extra_probe_dates", [])
-        if parse_day(d) >= today
+        if parse_day(d) >= today and (not limit or parse_day(d) <= limit)
     ]
     if extras and len(candidates) < max_pages:
         cursor = int(movie_state.get("date_probe_cursor", 0)) % len(extras)
@@ -541,6 +564,7 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
     first_run = not movie_state.get("initialized")
     new_showtimes: list[Showtime] = []
     dates = scan_dates_for_movie(movie_cfg, movie_state, today)
+    limit = monitoring_end(movie_cfg)
     if not dates:
         raise ScanError("No future probe dates configured; update the movie date range")
     log(f"{movie_cfg['short_name']}: scanning {len(dates)} date page(s): " + ", ".join(str(d) for d in dates))
@@ -555,6 +579,8 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
         if observation == "date_not_published":
             continue
         for st in showtimes_from_html(page, movie_cfg["movie_id"]):
+            if limit and parse_day(st.day) > limit:
+                continue
             if st.showtime_id not in movie_state["showtimes"]:
                 movie_state["showtimes"][st.showtime_id] = {
                     "theater_id": st.theater_id,
@@ -568,6 +594,8 @@ def discover_movie(movie_cfg: dict, movie_state: dict, theater: dict, polling: d
         movie_state["bootstrap_next_date"] = (dates[-1] + timedelta(days=1)).isoformat()
         window = monitoring_window(movie_cfg, today)
         baseline_end = window[1] if window else parse_day(movie_cfg["bootstrap_end"])
+        if limit:
+            baseline_end = min(baseline_end, limit)
         movie_state["initialized"] = dates[-1] >= baseline_end
     movie_state["date_observations"] = observations
     return first_run, new_showtimes
@@ -607,6 +635,7 @@ def eligible_showtimes(
 ) -> list[Showtime]:
     seat_cfg = movie_cfg["seat_watch"]
     window = monitoring_window(movie_cfg, today)
+    limit = monitoring_end(movie_cfg)
     if window:
         lower = max(today, window[0])
         cutoff = window[1]
@@ -622,6 +651,8 @@ def eligible_showtimes(
         starts_at = datetime.fromisoformat(meta["iso"])
         day = parse_day(meta["iso"][:10])
         if day < lower:
+            continue
+        if limit and day > limit:
             continue
         if not earliest <= starts_at.time() <= latest:
             continue
@@ -648,9 +679,9 @@ def select_showtimes_to_poll(
     movie_state["eligible_showtimes_this_run"] = len(all_future)
     pending = (set(movie_state.get("pending_seat_checks", [])) | new_ids | urgent) & eligible_ids
     movie_state["pending_seat_checks"] = sorted(pending)
-    priority = pending | (pinned & eligible_ids)
-    new = [st for st in all_future if st.showtime_id in priority]
-    recurring = [st for st in all_future if st.showtime_id not in priority]
+    pinned_showtimes = [st for st in all_future if st.showtime_id in pinned]
+    new = [st for st in all_future if st.showtime_id in pending and st.showtime_id not in pinned]
+    recurring = [st for st in all_future if st.showtime_id not in (pending | pinned)]
 
     # Focus recurring checks on the latest N distinct dates (the extension frontier).
     keep_dates_n = int(seat_cfg.get("latest_dates_to_poll", 2))
@@ -660,7 +691,7 @@ def select_showtimes_to_poll(
 
     # Rotate through at most max_seat_maps_per_run so every run stays short.
     max_maps = int(seat_cfg.get("max_seat_maps_per_run", 8))
-    remaining = max(max_maps - len(new), 0)
+    remaining = max(max_maps - len(pinned_showtimes) - len(new), 0)
     rotated: list[Showtime] = []
     if recurring and remaining:
         cursor = int(movie_state.get("seat_poll_cursor", 0)) % len(recurring)
@@ -670,8 +701,9 @@ def select_showtimes_to_poll(
 
     # A flood of brand-new showtimes should still be bounded; the rest will be picked up
     # as recurring on subsequent 10-minute runs.
-    selected = (new + rotated)[:max_maps]
-    return sorted({st.showtime_id: st for st in selected}.values(), key=lambda s: s.iso)
+    selected = (pinned_showtimes + new + rotated)[:max_maps]
+    return sorted({st.showtime_id: st for st in selected}.values(),
+                  key=lambda s: (s.showtime_id not in pinned, s.iso))
 
 
 def poll_seats_and_alert(
@@ -827,7 +859,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
     theater = config["theater"]
     polling = config.get("polling", {})
     tz = ZoneInfo(theater["timezone"])
-    today = datetime.now(tz).date()
+    today = utcnow().astimezone(tz).date()
     topic = os.environ.get("NTFY_TOPIC", "")
     state["version"] = 3
     state.setdefault("movies", {})
@@ -836,15 +868,36 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
     if not config.get("movies"):
         raise ScanError("At least one movie must be configured")
 
+    active_movies = []
+    for movie in config["movies"]:
+        mid = str(movie["movie_id"])
+        limit = monitoring_end(movie)
+        movie_state = state["movies"].get(mid, {})
+        if limit:
+            # A narrowed date range must also cancel previously queued alerts.
+            for alert in list(state["outbox"]):
+                if alert.get("movie_id") != mid or not alert.get("showtime_id"):
+                    continue
+                meta = movie_state.get("showtimes", {}).get(alert["showtime_id"], {})
+                if today > limit or (meta.get("iso") and parse_day(meta["iso"][:10]) > limit):
+                    state["outbox"].remove(alert)
+                    state["cancelled_alerts"] = int(state.get("cancelled_alerts", 0)) + 1
+        if limit and today > limit:
+            evidence = {"status": "inactive", "monitoring_end": limit.isoformat()}
+            result["movies"][mid] = evidence
+            state["movies"].setdefault(mid, {})["last_attempt"] = evidence
+        else:
+            active_movies.append(movie)
+
     if backoff_active(state):
         result.update(status="backoff", backoff_until=state["backoff_until"])
-        for movie in config["movies"]:
+        for movie in active_movies:
             result["movies"][str(movie["movie_id"])] = {"status": "backoff"}
         result["finished_at"] = utcnow().isoformat()
         state["last_scan"] = result
         return result
 
-    for movie_cfg in config["movies"]:
+    for movie_cfg in active_movies:
         mid = str(movie_cfg["movie_id"])
         previous_state = state["movies"].setdefault(
             mid,
@@ -915,7 +968,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
             result["movies"][mid] = evidence
         except CinemarkBackoff as exc:
             set_backoff(state, exc)
-            for target in config["movies"]:
+            for target in active_movies:
                 target_id = str(target["movie_id"])
                 result["movies"].setdefault(target_id, {"status": "backoff"})
             result["backoff_until"] = state["backoff_until"]
@@ -926,7 +979,8 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
             previous_state["last_attempt"] = evidence
             result["movies"][mid] = evidence
     result["finished_at"] = utcnow().isoformat()
-    result["status"] = "success" if all(m["status"] == "success" for m in result["movies"].values()) else "failed"
+    result["status"] = "success" if all(m["status"] in ("success", "inactive")
+                                        for m in result["movies"].values()) else "failed"
     state["last_scan"] = result
     return result
 
@@ -1012,6 +1066,7 @@ def status_lines(
         status = observed.get("status", "failed")
         if status != "success":
             availability = {"backoff": "CHECK SKIPPED: site backoff",
+                            "inactive": f"MONITORING ENDED: through {observed.get('monitoring_end', '')}",
                             "initializing": "BASELINE IN PROGRESS"}.get(status, "CHECK FAILED: availability unknown")
         elif observed.get("seat_maps_checked", 0):
             if observed.get("selectable_seats", 0):
