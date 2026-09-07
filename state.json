@@ -2,7 +2,7 @@
   "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641823&CinemarkMovieId=104867&Showtime=2026-09-10T11%3A45%3A00&CnkAction=share",
   "last_daily_status_date": "2026-09-07",
   "last_scan": {
-    "finished_at": "2026-09-07T18:34:15.027693+00:00",
+    "finished_at": "2026-09-07T18:42:18.289822+00:00",
     "movies": {
       "104867": {
         "error": "Missing, malformed, or duplicate seats; not a sold-out result",
@@ -16,11 +16,11 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-07T18:30:55.346774+00:00",
+    "started_at": "2026-09-07T18:40:45.761173+00:00",
     "status": "failed",
     "status_lines": [
-      "2026-09-07 01:34:15 PM CDT \u2014 ODYSSEY \u2014 CHECK FAILED: availability unknown \u2014 no notification sent",
-      "2026-09-07 01:34:15 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
+      "2026-09-07 01:42:18 PM CDT \u2014 ODYSSEY \u2014 CHECK FAILED: availability unknown \u2014 no notification sent",
+      "2026-09-07 01:42:18 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
