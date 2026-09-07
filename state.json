@@ -2,41 +2,25 @@
   "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641823&CinemarkMovieId=104867&Showtime=2026-09-10T11%3A45%3A00&CnkAction=share",
   "last_daily_status_date": "2026-09-07",
   "last_scan": {
-    "finished_at": "2026-09-07T18:24:40.865118+00:00",
+    "finished_at": "2026-09-07T18:34:15.027693+00:00",
     "movies": {
       "104867": {
-        "alertable_seats": 563,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-07T18:23:53.855061+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 71,
-        "known_showtimes": 128,
-        "preferred_blocks": 13,
-        "seat_maps_checked": 20,
-        "selectable_seats": 1847,
-        "status": "success"
+        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "109913": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-07T18:24:40.865106+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 1,
-        "known_showtimes": 1,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 1,
-        "selectable_seats": 2,
-        "status": "success"
+        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error_type": "ScanError",
+        "status": "failed"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-07T18:20:45.813473+00:00",
-    "status": "success",
+    "started_at": "2026-09-07T18:30:55.346774+00:00",
+    "status": "failed",
     "status_lines": [
-      "2026-09-07 01:23:53 PM CDT \u2014 ODYSSEY \u2014 tickets available (1847 selectable seats, 563 alert-eligible seats, 13 preferred seat blocks across 20 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
-      "2026-09-07 01:24:40 PM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-07 01:34:15 PM CDT \u2014 ODYSSEY \u2014 CHECK FAILED: availability unknown \u2014 no notification sent",
+      "2026-09-07 01:34:15 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -102,17 +86,9 @@
       "eligible_showtimes_this_run": 71,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 563,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-07T18:23:53.855061+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 71,
-        "known_showtimes": 128,
-        "preferred_blocks": 13,
-        "seat_maps_checked": 20,
-        "selectable_seats": 1847,
-        "status": "success"
+        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-07T18:23:53.855061+00:00",
       "pending_notification_checks": [],
@@ -2402,17 +2378,9 @@
       "eligible_showtimes_this_run": 1,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-07T18:24:40.865106+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 1,
-        "known_showtimes": 1,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 1,
-        "selectable_seats": 2,
-        "status": "success"
+        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-07T18:24:40.865106+00:00",
       "pending_notification_checks": [],
