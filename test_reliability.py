@@ -43,11 +43,15 @@ def seat_map(st=ST, available=True, row="H", available_numbers=None):
 def config(two=True):
     cfg = copy.deepcopy(w.load_json(w.CONFIG_PATH))
     cfg["polling"] = {"request_gap_seconds": 0, "timeout_seconds": 1}
+    # Keep synthetic fixtures independent of production priority and date limits.
+    cfg["movies"].sort(key=lambda movie: movie["movie_id"])
     cfg["movies"] = cfg["movies"][:2 if two else 1]
     for movie in cfg["movies"]:
         movie.pop("seed_showtimes", None)
+        movie.pop("monitoring_end", None)
         movie.update(monitoring_start=str(DAY), monitoring_window_days=1,
                      monitoring_window_shift_days=1,
+                     max_date_pages_per_run=5,
                      bootstrap_start=str(DAY), bootstrap_end=str(DAY),
                      pre_sale_probe_dates=[str(DAY)], extra_probe_dates=[],
                      frontier_lookbehind_days=0, frontier_lookahead_days=0)
@@ -262,14 +266,14 @@ class ScanTests(unittest.TestCase):
                          (date(2027, 1, 1), date(2027, 1, 30)))
 
     def test_dune_window_starts_december_17(self):
-        movie = w.load_json(w.CONFIG_PATH)["movies"][1]
+        movie = next(m for m in w.load_json(w.CONFIG_PATH)["movies"] if m["short_name"] == "DUNE")
         self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
                          (date(2026, 12, 17), date(2027, 1, 15)))
 
     def test_odyssey_window_starts_immediately(self):
-        movie = w.load_json(w.CONFIG_PATH)["movies"][0]
+        movie = next(m for m in w.load_json(w.CONFIG_PATH)["movies"] if m["short_name"] == "ODYSSEY")
         self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
-                         (date(2026, 9, 1), date(2026, 9, 30)))
+                         (date(2026, 9, 1), date(2026, 9, 17)))
 
     def test_showtime_selection_stays_inside_active_window(self):
         cfg = config(False)["movies"][0]
