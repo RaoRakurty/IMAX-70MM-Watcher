@@ -1,42 +1,24 @@
 {
-  "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641823&CinemarkMovieId=104867&Showtime=2026-09-10T11%3A45%3A00&CnkAction=share",
-  "last_daily_status_date": "2026-09-14",
+  "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641839&CinemarkMovieId=104867&Showtime=2026-09-16T15%3A30%3A00&CnkAction=share",
+  "backoff_until": "2026-09-15T20:02:28.401319+00:00",
+  "last_daily_status_date": "2026-09-15",
   "last_scan": {
-    "finished_at": "2026-09-15T13:54:59.053364+00:00",
+    "backoff_until": "2026-09-15T20:02:28.401319+00:00",
+    "finished_at": "2026-09-15T14:02:28.401401+00:00",
     "movies": {
       "104867": {
-        "alertable_seats": 217,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-15T13:54:13.263741+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 48,
-        "known_showtimes": 84,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 20,
-        "selectable_seats": 1415,
-        "status": "success"
+        "status": "backoff"
       },
       "109913": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-15T13:54:59.053351+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 1,
-        "known_showtimes": 1,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 1,
-        "selectable_seats": 2,
-        "status": "success"
+        "status": "backoff"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-15T13:51:03.021853+00:00",
-    "status": "success",
+    "started_at": "2026-09-15T14:01:17.288610+00:00",
+    "status": "failed",
     "status_lines": [
-      "2026-09-15 08:54:13 AM CDT \u2014 ODYSSEY \u2014 tickets available (1415 selectable seats, 217 alert-eligible seats, 0 preferred seat blocks across 20 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
-      "2026-09-15 08:54:59 AM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-15 09:02:28 AM CDT \u2014 ODYSSEY \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent",
+      "2026-09-15 09:02:28 AM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
     ]
   },
   "movies": {
