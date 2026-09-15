@@ -2,25 +2,17 @@
   "backoff_reason": "Cinemark returned HTTP 429 for https://www.cinemark.com/TicketSeatMap/?TheaterId=207&ShowtimeId=641823&CinemarkMovieId=104867&Showtime=2026-09-10T11%3A45%3A00&CnkAction=share",
   "last_daily_status_date": "2026-09-14",
   "last_scan": {
-    "finished_at": "2026-09-15T04:44:46.176534+00:00",
+    "finished_at": "2026-09-15T04:51:38.110537+00:00",
     "movies": {
       "104867": {
-        "alertable_seats": 218,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-15T04:44:00.261338+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 48,
-        "known_showtimes": 90,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 20,
-        "selectable_seats": 1361,
-        "status": "success"
+        "error": "Empty listings without an explicit no-showtimes response",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "109913": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-15T04:44:46.176520+00:00",
+        "checked_at": "2026-09-15T04:51:38.110526+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 1,
@@ -32,11 +24,11 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-15T04:40:45.018871+00:00",
-    "status": "success",
+    "started_at": "2026-09-15T04:50:46.286450+00:00",
+    "status": "failed",
     "status_lines": [
-      "2026-09-14 11:44:00 PM CDT \u2014 ODYSSEY \u2014 tickets available (1361 selectable seats, 218 alert-eligible seats, 0 preferred seat blocks across 20 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent",
-      "2026-09-14 11:44:46 PM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-14 11:51:38 PM CDT \u2014 ODYSSEY \u2014 CHECK FAILED: availability unknown \u2014 no notification sent",
+      "2026-09-14 11:51:38 PM CDT \u2014 DUNE \u2014 tickets available (2 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 1 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -102,17 +94,9 @@
       "eligible_showtimes_this_run": 48,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 218,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-15T04:44:00.261338+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 0,
-        "eligible_showtimes": 48,
-        "known_showtimes": 90,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 20,
-        "selectable_seats": 1361,
-        "status": "success"
+        "error": "Empty listings without an explicit no-showtimes response",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-15T04:44:00.261338+00:00",
       "pending_notification_checks": [],
@@ -1326,11 +1310,11 @@
         "2026-12-24": "2026-09-15T04:44:23.210231+00:00",
         "2026-12-25": "2026-09-15T04:44:30.928569+00:00",
         "2026-12-26": "2026-09-15T04:44:39.154332+00:00",
-        "2026-12-27": "2026-09-15T03:53:53.468916+00:00",
-        "2026-12-28": "2026-09-15T03:54:00.572866+00:00",
-        "2026-12-29": "2026-09-15T03:54:07.801304+00:00",
-        "2026-12-30": "2026-09-15T03:54:15.558779+00:00",
-        "2026-12-31": "2026-09-15T03:54:23.327983+00:00",
+        "2026-12-27": "2026-09-15T04:51:00.601672+00:00",
+        "2026-12-28": "2026-09-15T04:51:07.843529+00:00",
+        "2026-12-29": "2026-09-15T04:51:15.193839+00:00",
+        "2026-12-30": "2026-09-15T04:51:22.758430+00:00",
+        "2026-12-31": "2026-09-15T04:51:30.223474+00:00",
         "2027-01-01": "2026-09-15T04:04:34.644490+00:00",
         "2027-01-02": "2026-09-15T04:04:42.597715+00:00",
         "2027-01-03": "2026-09-15T04:04:50.448726+00:00",
@@ -1349,33 +1333,33 @@
       },
       "date_observations": [
         {
-          "date": "2026-12-22",
+          "date": "2026-12-27",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-23",
+          "date": "2026-12-28",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-24",
+          "date": "2026-12-29",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-25",
+          "date": "2026-12-30",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-26",
+          "date": "2026-12-31",
           "result": "date_not_published"
         }
       ],
-      "date_probe_cursor": 10,
+      "date_probe_cursor": 15,
       "eligible_showtimes_this_run": 1,
       "initialized": true,
       "last_attempt": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-15T04:44:46.176520+00:00",
+        "checked_at": "2026-09-15T04:51:38.110526+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 1,
@@ -1385,12 +1369,12 @@
         "selectable_seats": 2,
         "status": "success"
       },
-      "last_success_at": "2026-09-15T04:44:46.176520+00:00",
+      "last_success_at": "2026-09-15T04:51:38.110526+00:00",
       "pending_notification_checks": [],
       "pending_seat_checks": [],
       "preferred_blocks_this_run": 0,
       "seat_checked_at": {
-        "644486": "2026-09-15T04:44:46.176488+00:00"
+        "644486": "2026-09-15T04:51:38.110495+00:00"
       },
       "seat_maps_checked_this_run": 1,
       "seat_poll_cursor": 0,
