@@ -4,7 +4,7 @@
   "last_daily_status_date": "2026-09-16",
   "last_scan": {
     "backoff_until": "2026-09-17T00:13:59.946701+00:00",
-    "finished_at": "2026-09-16T19:02:03.429315+00:00",
+    "finished_at": "2026-09-16T19:10:51.434848+00:00",
     "movies": {
       "104867": {
         "status": "backoff"
@@ -14,11 +14,11 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-16T19:02:03.429246+00:00",
+    "started_at": "2026-09-16T19:10:51.434794+00:00",
     "status": "backoff",
     "status_lines": [
-      "2026-09-16 02:02:03 PM CDT \u2014 ODYSSEY \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent",
-      "2026-09-16 02:02:03 PM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
+      "2026-09-16 02:10:51 PM CDT \u2014 ODYSSEY \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent",
+      "2026-09-16 02:10:51 PM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
     ]
   },
   "movies": {
