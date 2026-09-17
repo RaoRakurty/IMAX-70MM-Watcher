@@ -82,12 +82,41 @@ jobs:
       - name: Run watcher
         id: scan
         if: ${{ inputs.test_notification != true }}
-        run: python watcher.py
+        shell: bash
+        run: |
+          set +e
+          python watcher.py
+          rc=$?
+          set -e
+
+          if [ "$rc" -eq 0 ]; then
+            exit 0
+          fi
+
+          scan_status=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("state.json")
+          if not path.exists():
+              print("")
+          else:
+              state = json.loads(path.read_text())
+              print(state.get("last_scan", {}).get("status", ""))
+          PY
+          )
+
+          if [ "$scan_status" = "backoff" ]; then
+            echo "Cinemark backoff is active; treating this as an expected healthy run."
+            exit 0
+          fi
+
+          exit "$rc"
 
       - name: Persist watcher state
         id: persist
-        # Failed scans must still persist backoff, successful other-movie results,
-        # and unsent notification outbox entries. The job remains failed.
+        # Persist backoff, successful scans, and unsent notification outbox entries.
+        # Genuine watcher failures remain failures; expected Cinemark backoff is healthy.
         if: ${{ always() && (steps.scan.outcome == 'success' || steps.scan.outcome == 'failure') }}
         shell: bash
         run: |
