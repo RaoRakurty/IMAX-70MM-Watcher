@@ -1,12 +1,12 @@
 {
   "last_daily_status_date": "2026-09-18",
   "last_scan": {
-    "finished_at": "2026-09-18T18:02:24.370561+00:00",
+    "finished_at": "2026-09-18T18:12:54.808679+00:00",
     "movies": {
       "109913": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-18T18:02:24.370548+00:00",
+        "checked_at": "2026-09-18T18:12:54.808666+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 3,
@@ -18,10 +18,10 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-18T18:01:22.128620+00:00",
+    "started_at": "2026-09-18T18:10:53.638388+00:00",
     "status": "success",
     "status_lines": [
-      "2026-09-18 01:02:24 PM CDT \u2014 DUNE \u2014 tickets available (21 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 3 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-18 01:12:54 PM CDT \u2014 DUNE \u2014 tickets available (21 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 3 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -40,11 +40,11 @@
         "2026-12-24": "2026-09-18T18:01:46.825986+00:00",
         "2026-12-25": "2026-09-18T18:01:54.390286+00:00",
         "2026-12-26": "2026-09-18T18:02:01.687133+00:00",
-        "2026-12-27": "2026-09-18T17:10:53.952040+00:00",
-        "2026-12-28": "2026-09-18T17:11:01.952568+00:00",
-        "2026-12-29": "2026-09-18T17:11:09.500542+00:00",
-        "2026-12-30": "2026-09-18T17:11:17.315532+00:00",
-        "2026-12-31": "2026-09-18T17:11:25.286715+00:00",
+        "2026-12-27": "2026-09-18T18:11:01.085927+00:00",
+        "2026-12-28": "2026-09-18T18:11:09.274317+00:00",
+        "2026-12-29": "2026-09-18T18:11:16.634700+00:00",
+        "2026-12-30": "2026-09-18T18:11:25.085374+00:00",
+        "2026-12-31": "2026-09-18T18:12:31.214126+00:00",
         "2027-01-01": "2026-09-18T17:20:54.513940+00:00",
         "2027-01-02": "2026-09-18T17:21:02.408038+00:00",
         "2027-01-03": "2026-09-18T17:21:10.587140+00:00",
@@ -63,33 +63,33 @@
       },
       "date_observations": [
         {
-          "date": "2026-12-22",
+          "date": "2026-12-27",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-23",
+          "date": "2026-12-28",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-24",
+          "date": "2026-12-29",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-25",
+          "date": "2026-12-30",
           "result": "date_not_published"
         },
         {
-          "date": "2026-12-26",
+          "date": "2026-12-31",
           "result": "date_not_published"
         }
       ],
-      "date_probe_cursor": 10,
+      "date_probe_cursor": 15,
       "eligible_showtimes_this_run": 3,
       "initialized": true,
       "last_attempt": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-18T18:02:24.370548+00:00",
+        "checked_at": "2026-09-18T18:12:54.808666+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 3,
@@ -99,14 +99,14 @@
         "selectable_seats": 21,
         "status": "success"
       },
-      "last_success_at": "2026-09-18T18:02:24.370548+00:00",
+      "last_success_at": "2026-09-18T18:12:54.808666+00:00",
       "pending_notification_checks": [],
       "pending_seat_checks": [],
       "preferred_blocks_this_run": 0,
       "seat_checked_at": {
-        "644486": "2026-09-18T18:02:09.714136+00:00",
-        "644488": "2026-09-18T18:02:24.370517+00:00",
-        "644489": "2026-09-18T18:02:17.031115+00:00"
+        "644486": "2026-09-18T18:12:39.025095+00:00",
+        "644488": "2026-09-18T18:12:54.808635+00:00",
+        "644489": "2026-09-18T18:12:46.921658+00:00"
       },
       "seat_maps_checked_this_run": 3,
       "seat_poll_cursor": 0,
