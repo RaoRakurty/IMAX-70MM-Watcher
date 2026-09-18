@@ -17,12 +17,12 @@ from state_store import FirestoreStore, LeaseLost
 
 DAY = date.today() + timedelta(days=1)
 ISO = DAY.isoformat() + "T19:15:00"
-ST = w.Showtime("207", "123", "104867", ISO)
+ST = w.Showtime("207", "123", "109913", ISO)
 THEATER = {"id": "207", "name": "Cinemark Dallas XD and IMAX",
            "slug": "tx-dallas/cinemark-dallas-xd-and-imax", "timezone": "America/Chicago"}
 
 
-def listing(day=DAY, movie="104867", sid="123", selected=None, offered=None):
+def listing(day=DAY, movie="109913", sid="123", selected=None, offered=None):
     selected = selected or day
     offered = offered or [selected]
     return (f'<title>{THEATER["name"]}</title>'
@@ -136,7 +136,7 @@ class ValidationTests(unittest.TestCase):
     def test_after_midnight_showtime_belongs_to_previous_business_day(self):
         spillover = DAY + timedelta(days=1)
         late_link = (f'<a href="/TicketSeatMap/?TheaterId=207&amp;ShowtimeId=124&amp;'
-                     f'CinemarkMovieId=104867&amp;Showtime={spillover}T02:45:00">late</a>')
+                     f'CinemarkMovieId=109913&amp;Showtime={spillover}T02:45:00">late</a>')
         page = listing().replace("</a></div>", f"</a>{late_link}</div>")
         self.assertEqual(w.validate_discovery(page, THEATER, DAY), "selected_date")
 
@@ -178,12 +178,12 @@ class ScanTests(unittest.TestCase):
     def tearDown(self):
         self.output.__exit__(None, None, None)
 
-    def test_two_valid_negative_observations(self):
+    def test_valid_negative_observation(self):
         s = state()
         with patch.object(w, "fetch", return_value=listing(movie="999")):
             result = w.run_once(config(), s)
         self.assertEqual(result["status"], "success")
-        self.assertEqual(len(result["movies"]), 2)
+        self.assertEqual(len(result["movies"]), 1)
         self.assertTrue(all(m.get("last_success_at") for m in s["movies"].values()))
 
     def test_failure_not_swallowed_and_old_snapshot_preserved(self):
@@ -194,12 +194,6 @@ class ScanTests(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertEqual(s["movies"][ST.movie_id]["showtimes"], original)
         self.assertNotIn("last_success_at", s["movies"][ST.movie_id])
-
-    def test_one_movie_failure_does_not_hide_other_result(self):
-        with patch.object(w, "fetch", side_effect=[TimeoutError(), listing(movie="999")]):
-            result = w.run_once(config(), state())
-        self.assertEqual(result["status"], "failed")
-        self.assertEqual(result["movies"]["109913"]["status"], "success")
 
     def test_backoff_does_not_fetch_or_succeed(self):
         s = state()
@@ -262,14 +256,9 @@ class ScanTests(unittest.TestCase):
                          (date(2027, 1, 1), date(2027, 1, 30)))
 
     def test_dune_window_starts_december_17(self):
-        movie = w.load_json(w.CONFIG_PATH)["movies"][1]
-        self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
-                         (date(2026, 12, 17), date(2027, 1, 15)))
-
-    def test_odyssey_window_starts_immediately(self):
         movie = w.load_json(w.CONFIG_PATH)["movies"][0]
         self.assertEqual(w.monitoring_window(movie, date(2026, 9, 1)),
-                         (date(2026, 9, 1), date(2026, 9, 30)))
+                         (date(2026, 12, 17), date(2027, 1, 15)))
 
     def test_showtime_selection_stays_inside_active_window(self):
         cfg = config(False)["movies"][0]
@@ -369,7 +358,7 @@ class ScanTests(unittest.TestCase):
         with patch.object(w, "fetch", return_value=seat_map(row="E", available_numbers={10, 11})):
             w.poll_seats_and_alert(*args, notify=notify)
         notify.assert_called_once()
-        self.assertEqual(notify.call_args.args[1], "SEAT OPENED: ODYSSEY")
+        self.assertEqual(notify.call_args.args[1], "SEAT OPENED: DUNE")
 
     def test_existing_inventory_is_baselined_when_per_seat_snapshot_is_added(self):
         movie = config(False)["movies"][0]

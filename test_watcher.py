@@ -4,8 +4,8 @@ from watcher import best_blocks, seats_from_html, showtimes_from_html
 
 class WatcherTests(unittest.TestCase):
     def test_showtime_parse(self):
-        h = '''<a href="/TicketSeatMap/?TheaterId=207&amp;ShowtimeId=641727&amp;CinemarkMovieId=104867&amp;Showtime=2026-09-18T19:15:00">go</a>'''
-        xs = showtimes_from_html(h, "104867")
+        h = '''<a href="/TicketSeatMap/?TheaterId=207&amp;ShowtimeId=641727&amp;CinemarkMovieId=109913&amp;Showtime=2026-12-18T19:15:00">go</a>'''
+        xs = showtimes_from_html(h, "109913")
         self.assertEqual(len(xs), 1)
         self.assertEqual(xs[0].showtime_id, "641727")
         self.assertEqual(xs[0].theater_id, "207")

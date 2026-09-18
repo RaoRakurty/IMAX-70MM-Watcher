@@ -76,9 +76,9 @@ contain **Signed automatic run**, its scheduled slot, successful scan and state
 persistence, plus timestamped movie observations such as:
 
 ```text
-10:40 AM CDT — ODYSSEY — tickets unavailable — no notification sent
-10:50 AM CDT — ODYSSEY — tickets unavailable — no notification sent
-11:00 AM CDT — ODYSSEY — tickets available — notification sent
+10:40 AM CDT — DUNE — tickets unavailable — no notification sent
+10:50 AM CDT — DUNE — tickets unavailable — no notification sent
+11:00 AM CDT — DUNE — tickets available — notification sent
 ```
 
 Those lines are illustrative only. Production output always uses actual scan

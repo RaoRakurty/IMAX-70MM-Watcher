@@ -15,7 +15,7 @@ class CadenceTests(unittest.TestCase):
                                  "started_at": (slot+timedelta(seconds=5)).isoformat(),
                                  "finished_at": (slot+timedelta(seconds=150)).isoformat(),
                                  "status": "success", "heartbeat_sent": True,
-                                 "movies": {"104867": {"status": "success"}, "109913": {"status": "success"}}})
+                                 "movies": {"109913": {"status": "success"}}})
 
     def test_complete_24_hour_window(self):
         result = audit(self.records, self.start)
@@ -35,7 +35,7 @@ class CadenceTests(unittest.TestCase):
     def test_failed_or_partial_or_no_heartbeat_cannot_count(self):
         variants = [dict(status="failed"), dict(heartbeat_sent=False),
                     dict(movies={"109913": {"status": "failed"}}),
-                    dict(movies={"109913": {"status": "success"}})]
+                    dict(movies={})]
         for change in variants:
             records = copy.deepcopy(self.records)
             records[10].update(change)

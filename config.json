@@ -12,32 +12,6 @@
   },
   "movies": [
     {
-      "name": "The Odyssey IMAX 70MM",
-      "short_name": "ODYSSEY",
-      "movie_id": "104867",
-      "enabled": false,
-      "monitoring_start": "2026-09-01",
-      "monitoring_window_days": 30,
-      "monitoring_window_shift_days": 15,
-      "bootstrap_start": "2026-09-01",
-      "bootstrap_end": "2026-09-30",
-      "max_date_pages_per_run": 5,
-      "frontier_lookbehind_days": 1,
-      "frontier_lookahead_days": 3,
-      "pre_sale_probe_dates": ["2026-09-16", "2026-09-17"],
-      "extra_probe_dates": ["2026-09-18", "2026-09-19", "2026-09-20"],
-      "seat_watch": {
-        "party_size": 1,
-        "preferred_rows": ["H", "J", "G", "K"],
-        "ignored_rows": ["A", "B", "C", "D"],
-        "earliest_showtime": "09:00",
-        "latest_showtime": "22:59",
-        "center_tolerance": 0.55,
-        "latest_dates_to_poll": 30,
-        "max_seat_maps_per_run": 20
-      }
-    },
-    {
       "name": "Dune: Part Three IMAX 70MM",
       "short_name": "DUNE",
       "movie_id": "109913",

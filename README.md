@@ -13,14 +13,13 @@ ten-minute cadence fixed.** The earlier Google Cloud implementation remains in
 the repository as an optional alternative, documented in `DEPLOYMENT.md`.
 
 Failed, skipped/backoff, incomplete, or unparseable checks now exit nonzero.
-Health is sent only after validated observations for both movies and durable
+Health is sent only after validated observations for the configured movie and durable
 state/notification processing. Manual runs and ntfy tests never count as
 scheduler proof. A signed HMAC binds each automatic run to its UTC ten-minute
 slot, and stale or forged dispatches fail before scanning.
 
-Personal watcher configured for **Cinemark Dallas XD and IMAX** (TheaterId **207**) and these two targets:
+Personal watcher configured for **Cinemark Dallas XD and IMAX** (TheaterId **207**) and this target:
 
-- **The Odyssey IMAX 70MM** — CinemarkMovieId `104867`
 - **Dune: Part Three IMAX 70MM** — CinemarkMovieId `109913`
 
 It checks for **new dates/showtimes** and, on a bounded set of recent/frontier showtimes, checks for **preferred center-seat openings**. When it finds something, it publishes a **priority-5 ntfy notification** with the exact seat label and a **BOOK NOW** button that opens the exact Cinemark seat map.
@@ -32,7 +31,7 @@ It does **not** log in, hold seats, click checkout, or purchase tickets.
 The high-value event is usually a newly released batch. Instead of hammering every seat map all day, the watcher:
 
 1. Baselines the current known showtimes silently on its first run.
-2. Rotates through each movie's active 30-day window in five-date batches.
+2. Rotates through the movie's active 30-day window in five-date batches.
 3. Advances that window by 15 days every 15 days, retaining a 15-day overlap.
 4. Always inspects a newly discovered showtime once, so the first ntfy alert can tell you the best preferred seat immediately.
 
@@ -77,7 +76,7 @@ Rows G/H/J/K receive prime-seat alerts, E/F can still produce a general newly
 opened-seat alert, and A-D never alert. Shows earlier than 9:00 AM or starting
 at 11:00 PM and later are excluded before seat-map polling.
 
-If you need **two adjacent seats**, change both movie sections to:
+If you need **two adjacent seats**, change the movie section to:
 
 ```json
 "party_size": 2
@@ -86,11 +85,6 @@ If you need **two adjacent seats**, change both movie sections to:
 For stricter center seats, lower `center_tolerance` (for example `0.35`). For a wider acceptable zone, raise it toward `1.0`.
 
 ## Current discovery strategy
-
-### Odyssey
-
-The first window starts immediately on **Sep 1, 2026** and covers through
-**Sep 30, 2026**. On Sep 16 it advances to Sep 16 through Oct 15.
 
 ### Dune: Part Three
 
@@ -102,18 +96,13 @@ configured Dec 17, 3:15 PM Dune showtime is pinned into every natural run.
 
 ## Notification examples
 
-Every run also prints a timestamped observation for each movie, including
+Every run also prints a timestamped observation for the movie, including
 checked-showtime scope and whether ntfy accepted a notification. These lines
 appear in the GitHub run's **Summary** and logs, and in the cloud run record's
 `status_lines`. The time is the actual observation time in America/Chicago,
 not an assumed cron start. Dry runs, unpublished dates, and failed checks are
 labelled explicitly. Existing availability does not cause a new notification
 unless it meets the configured new-showtime/opening rules.
-
-New batch/showtime:
-
-> **NEW ODYSSEY IMAX 70MM**  
-> Fri Sep 18, 7:15 PM — best preferred seat: H14. Tap BOOK NOW.
 
 Cancellation/opening:
 

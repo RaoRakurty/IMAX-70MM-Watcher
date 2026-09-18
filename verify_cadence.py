@@ -18,7 +18,7 @@ def timestamp(raw):
     return value.astimezone(timezone.utc)
 
 
-def audit(records, start, hours=24, expected_movie_ids=("104867", "109913")):
+def audit(records, start, hours=24, expected_movie_ids=("109913",)):
     if start.tzinfo is None or start.minute % 10 or start.second or start.microsecond or hours < 1:
         raise ValueError("Window must start on a ten-minute boundary and span at least one hour")
     start = start.astimezone(timezone.utc)
