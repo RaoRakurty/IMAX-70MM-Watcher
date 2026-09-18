@@ -15,6 +15,7 @@
       "name": "The Odyssey IMAX 70MM",
       "short_name": "ODYSSEY",
       "movie_id": "104867",
+      "enabled": false,
       "monitoring_start": "2026-09-01",
       "monitoring_window_days": 30,
       "monitoring_window_shift_days": 15,
