@@ -1,12 +1,12 @@
 {
   "last_daily_status_date": "2026-09-19",
   "last_scan": {
-    "finished_at": "2026-09-19T21:32:06.975531+00:00",
+    "finished_at": "2026-09-19T21:42:00.454899+00:00",
     "movies": {
       "109913": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-19T21:32:06.975519+00:00",
+        "checked_at": "2026-09-19T21:42:00.454886+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 4,
@@ -18,10 +18,10 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-19T21:30:54.252780+00:00",
+    "started_at": "2026-09-19T21:40:46.546872+00:00",
     "status": "success",
     "status_lines": [
-      "2026-09-19 04:32:06 PM CDT \u2014 DUNE \u2014 tickets available (21 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 4 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-19 04:42:00 PM CDT \u2014 DUNE \u2014 tickets available (21 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 4 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -55,41 +55,41 @@
         "2027-01-08": "2026-09-19T21:31:19.238984+00:00",
         "2027-01-09": "2026-09-19T21:31:27.665256+00:00",
         "2027-01-10": "2026-09-19T21:31:35.321038+00:00",
-        "2027-01-11": "2026-09-19T20:40:57.596671+00:00",
-        "2027-01-12": "2026-09-19T20:41:05.103675+00:00",
-        "2027-01-13": "2026-09-19T20:41:12.676538+00:00",
-        "2027-01-14": "2026-09-19T20:41:20.914672+00:00",
-        "2027-01-15": "2026-09-19T20:41:29.398031+00:00"
+        "2027-01-11": "2026-09-19T21:40:54.293168+00:00",
+        "2027-01-12": "2026-09-19T21:41:02.832512+00:00",
+        "2027-01-13": "2026-09-19T21:41:11.093641+00:00",
+        "2027-01-14": "2026-09-19T21:41:19.402387+00:00",
+        "2027-01-15": "2026-09-19T21:41:28.532229+00:00"
       },
       "date_observations": [
         {
-          "date": "2027-01-06",
+          "date": "2027-01-11",
           "result": "date_not_published"
         },
         {
-          "date": "2027-01-07",
+          "date": "2027-01-12",
           "result": "date_not_published"
         },
         {
-          "date": "2027-01-08",
+          "date": "2027-01-13",
           "result": "date_not_published"
         },
         {
-          "date": "2027-01-09",
+          "date": "2027-01-14",
           "result": "date_not_published"
         },
         {
-          "date": "2027-01-10",
+          "date": "2027-01-15",
           "result": "date_not_published"
         }
       ],
-      "date_probe_cursor": 25,
+      "date_probe_cursor": 0,
       "eligible_showtimes_this_run": 4,
       "initialized": true,
       "last_attempt": {
         "alertable_seats": 0,
         "alerts_queued": 0,
-        "checked_at": "2026-09-19T21:32:06.975519+00:00",
+        "checked_at": "2026-09-19T21:42:00.454886+00:00",
         "date_pages_checked": 5,
         "dates_not_published": 5,
         "eligible_showtimes": 4,
@@ -99,15 +99,15 @@
         "selectable_seats": 21,
         "status": "success"
       },
-      "last_success_at": "2026-09-19T21:32:06.975519+00:00",
+      "last_success_at": "2026-09-19T21:42:00.454886+00:00",
       "pending_notification_checks": [],
       "pending_seat_checks": [],
       "preferred_blocks_this_run": 0,
       "seat_checked_at": {
-        "626030": "2026-09-19T21:32:06.975488+00:00",
-        "644486": "2026-09-19T21:31:43.436451+00:00",
-        "644488": "2026-09-19T21:31:58.627557+00:00",
-        "644489": "2026-09-19T21:31:51.220083+00:00"
+        "626030": "2026-09-19T21:42:00.454856+00:00",
+        "644486": "2026-09-19T21:41:37.061911+00:00",
+        "644488": "2026-09-19T21:41:52.703974+00:00",
+        "644489": "2026-09-19T21:41:44.963557+00:00"
       },
       "seat_maps_checked_this_run": 4,
       "seat_poll_cursor": 0,
