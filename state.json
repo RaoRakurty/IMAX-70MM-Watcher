@@ -1,27 +1,19 @@
 {
   "last_daily_status_date": "2026-09-23",
   "last_scan": {
-    "finished_at": "2026-09-23T19:13:10.401192+00:00",
+    "finished_at": "2026-09-23T19:20:51.806222+00:00",
     "movies": {
       "109913": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-23T19:13:10.401176+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 15,
-        "known_showtimes": 33,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 15,
-        "selectable_seats": 311,
-        "status": "success"
+        "error": "Theater calendar missing or ambiguous",
+        "error_type": "ScanError",
+        "status": "failed"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-23T19:10:42.993805+00:00",
-    "status": "success",
+    "started_at": "2026-09-23T19:20:43.766491+00:00",
+    "status": "failed",
     "status_lines": [
-      "2026-09-23 02:13:10 PM CDT \u2014 DUNE \u2014 tickets available (311 selectable seats, 0 alert-eligible seats, 0 preferred seat blocks across 15 checked showtimes) \u2014 no new qualifying alert \u2014 no notification sent"
+      "2026-09-23 02:20:51 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -87,17 +79,9 @@
       "eligible_showtimes_this_run": 15,
       "initialized": true,
       "last_attempt": {
-        "alertable_seats": 0,
-        "alerts_queued": 0,
-        "checked_at": "2026-09-23T19:13:10.401176+00:00",
-        "date_pages_checked": 5,
-        "dates_not_published": 5,
-        "eligible_showtimes": 15,
-        "known_showtimes": 33,
-        "preferred_blocks": 0,
-        "seat_maps_checked": 15,
-        "selectable_seats": 311,
-        "status": "success"
+        "error": "Theater calendar missing or ambiguous",
+        "error_type": "ScanError",
+        "status": "failed"
       },
       "last_success_at": "2026-09-23T19:13:10.401176+00:00",
       "pending_notification_checks": [],
