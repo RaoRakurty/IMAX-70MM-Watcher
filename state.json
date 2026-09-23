@@ -1,19 +1,19 @@
 {
   "last_daily_status_date": "2026-09-22",
   "last_scan": {
-    "finished_at": "2026-09-23T11:21:33.039623+00:00",
+    "finished_at": "2026-09-23T11:30:54.400406+00:00",
     "movies": {
       "109913": {
-        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error": "Theater calendar missing or ambiguous",
         "error_type": "ScanError",
         "status": "failed"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-23T11:20:47.845717+00:00",
+    "started_at": "2026-09-23T11:30:47.342836+00:00",
     "status": "failed",
     "status_lines": [
-      "2026-09-23 06:21:33 AM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
+      "2026-09-23 06:30:54 AM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
@@ -79,7 +79,7 @@
       "eligible_showtimes_this_run": 15,
       "initialized": true,
       "last_attempt": {
-        "error": "Missing, malformed, or duplicate seats; not a sold-out result",
+        "error": "Theater calendar missing or ambiguous",
         "error_type": "ScanError",
         "status": "failed"
       },
