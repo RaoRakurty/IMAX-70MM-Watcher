@@ -1,7 +1,7 @@
 {
   "last_daily_status_date": "2026-09-23",
   "last_scan": {
-    "finished_at": "2026-09-23T20:21:07.624060+00:00",
+    "finished_at": "2026-09-23T20:31:29.697293+00:00",
     "movies": {
       "109913": {
         "error": "Theater calendar missing or ambiguous",
@@ -10,10 +10,10 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-23T20:20:57.715043+00:00",
+    "started_at": "2026-09-23T20:31:20.667343+00:00",
     "status": "failed",
     "status_lines": [
-      "2026-09-23 03:21:07 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
+      "2026-09-23 03:31:29 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
     ]
   },
   "movies": {
