@@ -1,19 +1,25 @@
 {
+  "backoff_kind": "site_validation",
+  "backoff_reason": "Cinemark site validation failed: Theater calendar missing or ambiguous",
+  "backoff_until": "2026-09-24T23:10:52.166787+00:00",
   "last_daily_status_date": "2026-09-24",
   "last_scan": {
-    "finished_at": "2026-09-24T17:01:01.992771+00:00",
+    "backoff_kind": "site_validation",
+    "backoff_reason": "Cinemark site validation failed: Theater calendar missing or ambiguous",
+    "backoff_until": "2026-09-24T23:10:52.166787+00:00",
+    "finished_at": "2026-09-24T17:10:52.167008+00:00",
     "movies": {
       "109913": {
-        "error": "Theater calendar missing or ambiguous",
-        "error_type": "ScanError",
-        "status": "failed"
+        "backoff_kind": "site_validation",
+        "backoff_reason": "Cinemark site validation failed: Theater calendar missing or ambiguous",
+        "status": "backoff"
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-24T17:00:54.644245+00:00",
-    "status": "failed",
+    "started_at": "2026-09-24T17:10:44.933270+00:00",
+    "status": "backoff",
     "status_lines": [
-      "2026-09-24 12:01:01 PM CDT \u2014 DUNE \u2014 CHECK FAILED: availability unknown \u2014 no notification sent"
+      "2026-09-24 12:10:52 PM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
     ]
   },
   "movies": {
