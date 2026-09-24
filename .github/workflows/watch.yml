@@ -84,6 +84,7 @@ jobs:
         if: ${{ inputs.test_notification != true }}
         shell: bash
         run: |
+          run_started_at=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
           set +e
           python watcher.py
           rc=$?
@@ -93,8 +94,10 @@ jobs:
             exit 0
           fi
 
-          scan_status=$(python - <<'PY'
+          scan_status=$(python - "$run_started_at" <<'PY'
           import json
+          import sys
+          from datetime import datetime, timezone
           from pathlib import Path
 
           path = Path("state.json")
@@ -102,12 +105,21 @@ jobs:
               print("")
           else:
               state = json.loads(path.read_text())
-              print(state.get("last_scan", {}).get("status", ""))
+              last_scan = state.get("last_scan", {})
+              try:
+                  run_started = datetime.fromisoformat(sys.argv[1])
+                  scan_started = datetime.fromisoformat(last_scan.get("started_at", ""))
+                  if scan_started.tzinfo is None:
+                      scan_started = scan_started.replace(tzinfo=timezone.utc)
+                  fresh = scan_started >= run_started.astimezone(timezone.utc)
+              except (ValueError, TypeError):
+                  fresh = False
+              print(last_scan.get("status", "") if fresh else "")
           PY
           )
 
           if [ "$scan_status" = "backoff" ]; then
-            echo "Cinemark backoff is active; treating this as an expected healthy run."
+            echo "Cinemark backoff is active; treating this as an expected completed run."
             exit 0
           fi
 
@@ -144,7 +156,7 @@ jobs:
           echo "Could not persist state after 3 attempts" >&2
           exit 1
 
-      - name: Mark automatic check successful
+      - name: Mark automatic check healthy
         if: ${{ inputs.scheduler_source == 'cloudflare-cron' && steps.scan.outcome == 'success' && steps.persist.outcome == 'success' }}
         env:
           HC_PING_URL: ${{ secrets.HC_PING_URL }}
@@ -157,11 +169,24 @@ jobs:
           SCAN_OUTCOME: ${{ steps.scan.outcome }}
           PERSIST_OUTCOME: ${{ steps.persist.outcome }}
         run: |
+          watcher_status=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("state.json")
+          if not path.exists():
+              print("unknown")
+          else:
+              state = json.loads(path.read_text())
+              print(state.get("last_scan", {}).get("status", "unknown"))
+          PY
+          )
           {
             echo "## Signed automatic run"
             echo
             echo "- Scheduled slot: $SCHEDULED_SLOT"
-            echo "- Scan: $SCAN_OUTCOME"
+            echo "- Workflow scan step: $SCAN_OUTCOME"
+            echo "- Watcher status: $watcher_status"
             echo "- State persistence: $PERSIST_OUTCOME"
             echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -8,6 +8,7 @@
   "polling": {
     "request_gap_seconds": 6.0,
     "timeout_seconds": 25,
+    "site_error_backoff_seconds": 21600,
     "daily_status_after": "09:00"
   },
   "movies": [

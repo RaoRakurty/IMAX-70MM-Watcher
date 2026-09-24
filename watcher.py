@@ -45,10 +45,15 @@ HREF_RE = re.compile(r'href=["\']([^"\']*TicketSeatMap/\?[^"\']+)["\']', re.I)
 BUTTON_RE = re.compile(r"<button\b[^>]*>", re.I)
 ATTR_RE = re.compile(r'([:\w-]+)\s*=\s*["\']([^"\']*)["\']', re.I)
 DEADLINE = contextvars.ContextVar("scan_deadline", default=None)
+SITE_VALIDATION_BACKOFF_SECONDS = 6 * 3600
 
 
 class ScanError(RuntimeError):
     """A response cannot establish a valid positive or negative observation."""
+
+
+class SiteValidationError(ScanError):
+    """Cinemark responded, but the public page cannot be trusted as inventory."""
 
 
 def remaining_timeout(requested: float) -> float:
@@ -115,11 +120,11 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
     """
     facts = PageFacts(page)
     if theater["name"].casefold() not in facts.title.casefold():
-        raise ScanError("Theater page identity missing (blocked or changed markup)")
+        raise SiteValidationError("Theater page identity missing (blocked or changed markup)")
     calendars = [a for _, a in facts.tags if a.get("data-test") == "ShowdatesList"]
     offered = {a["data-datevalue"] for _, a in facts.tags if a.get("data-datevalue")}
     if len(calendars) != 1 or not offered:
-        raise ScanError("Theater calendar missing or ambiguous")
+        raise SiteValidationError("Theater calendar missing or ambiguous")
     raw = calendars[0].get("data-showdates", "").split(" ")[0]
     try:
         selected_day = datetime.strptime(raw, "%m/%d/%Y").date()
@@ -127,9 +132,9 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
         for day in offered:
             parse_day(day)
     except ValueError as exc:
-        raise ScanError("Unrecognized theater calendar dates") from exc
+        raise SiteValidationError("Unrecognized theater calendar dates") from exc
     if selected not in offered:
-        raise ScanError("Selected date is not in the advertised calendar")
+        raise SiteValidationError("Selected date is not in the advertised calendar")
     links = []
     for tag, attrs in facts.tags:
         href = attrs.get("href", "")
@@ -137,30 +142,30 @@ def validate_discovery(page: str, theater: dict, requested_day: date) -> str:
             continue
         qs = urllib.parse.parse_qs(urllib.parse.urlparse(href).query)
         if (qs.get("TheaterId") or [""])[0] != str(theater["id"]):
-            raise ScanError("Showtime link belongs to a different theater")
+            raise SiteValidationError("Showtime link belongs to a different theater")
         iso = (qs.get("Showtime") or [""])[0]
         try:
             parsed_showtime = datetime.fromisoformat(iso)
         except ValueError as exc:
-            raise ScanError("Malformed showtime date") from exc
+            raise SiteValidationError("Malformed showtime date") from exc
         after_midnight_spillover = (
             parsed_showtime.date() == selected_day + timedelta(days=1)
             and parsed_showtime.hour < 6
         )
         if parsed_showtime.date() != selected_day and not after_midnight_spillover:
-            raise ScanError("Showtime links do not match selected calendar date")
+            raise SiteValidationError("Showtime links do not match selected calendar date")
         links.append(href)
     # Require a recognizable listings container even for a legitimate empty day.
     if not any(a.get("id") == "listOfMoviesOrTheaters" for _, a in facts.tags):
-        raise ScanError("Theater listings container missing")
+        raise SiteValidationError("Theater listings container missing")
     wanted = requested_day.isoformat()
     if selected != wanted and wanted not in offered:
         return "date_not_published"
     if not links and not re.search(r"\b(no showtimes available|there are no showtimes)\b", facts.listing_text, re.I):
-        raise ScanError("Empty listings without an explicit no-showtimes response")
+        raise SiteValidationError("Empty listings without an explicit no-showtimes response")
     if selected == wanted:
         return "selected_date"
-    raise ScanError("Server did not return the requested advertised date")
+    raise SiteValidationError("Server did not return the requested advertised date")
 
 
 class CinemarkBackoff(RuntimeError):
@@ -273,10 +278,10 @@ def fetch(url: str, gap: float, timeout: int) -> str:
         try:
             with urllib.request.urlopen(req, timeout=remaining_timeout(timeout)) as resp:
                 if urllib.parse.urlparse(resp.url).hostname not in ("www.cinemark.com", "cinemark.com"):
-                    raise ScanError("Unexpected redirect outside Cinemark")
+                    raise SiteValidationError("Unexpected redirect outside Cinemark")
                 raw = resp.read(2_000_001)
                 if len(raw) > 2_000_000:
-                    raise ScanError("Unexpectedly large Cinemark response")
+                    raise SiteValidationError("Unexpectedly large Cinemark response")
                 body = raw.decode("utf-8", errors="replace")
             if gap:
                 paced_sleep(gap + random.uniform(0, max(gap * 0.20, 0.25)))
@@ -346,22 +351,22 @@ def validated_seats(page: str, showtime: Showtime) -> list[Seat]:
     facts = PageFacts(page)
     forms = [a for tag, a in facts.tags if tag == "form" and a.get("id") == "FormSeatMap"]
     if len(forms) != 1 or "reserve your seats" not in facts.title.lower():
-        raise ScanError("Seat-map identity missing (blocked or changed markup)")
+        raise SiteValidationError("Seat-map identity missing (blocked or changed markup)")
     qs = urllib.parse.parse_qs(urllib.parse.urlparse(forms[0].get("action", "")).query)
     expected = {"TheaterId": showtime.theater_id, "ShowtimeId": showtime.showtime_id,
                 "CinemarkMovieId": showtime.movie_id, "Showtime": showtime.iso}
     if any(qs.get(key) != [str(value)] for key, value in expected.items()):
-        raise ScanError("Seat-map form belongs to a different showtime/movie/theater")
+        raise SiteValidationError("Seat-map form belongs to a different showtime/movie/theater")
     buttons = [a for tag, a in facts.tags if tag == "button" and a.get("info")]
     for attrs in buttons:
         parts = attrs["info"].split(",")
         if len(parts) < 5 or parts[4].strip() != showtime.showtime_id:
-            raise ScanError("Seat belongs to another showtime or has changed markup")
+            raise SiteValidationError("Seat belongs to another showtime or has changed markup")
         if attrs.get("available", "").lower() not in ("true", "false"):
-            raise ScanError("Seat availability field missing")
+            raise SiteValidationError("Seat availability field missing")
     seats = seats_from_html(page)
     if not seats or len(seats) != len(buttons) or len({s.label for s in seats}) != len(seats):
-        raise ScanError("Missing, malformed, or duplicate seats; not a sold-out result")
+        raise SiteValidationError("Missing, malformed, or duplicate seats; not a sold-out result")
     return seats
 
 
@@ -811,11 +816,32 @@ def backoff_active(state: dict) -> bool:
     return True
 
 
-def set_backoff(state: dict, exc: CinemarkBackoff) -> None:
+def configured_site_backoff_seconds(polling: dict) -> int:
+    raw = polling.get("site_error_backoff_seconds", SITE_VALIDATION_BACKOFF_SECONDS)
+    try:
+        seconds = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ScanError("polling.site_error_backoff_seconds must be an integer") from exc
+    if seconds < 600:
+        raise ScanError("polling.site_error_backoff_seconds must be at least 600")
+    return seconds
+
+
+def set_backoff(state: dict, exc: CinemarkBackoff, kind: str = "http") -> None:
     until = utcnow() + timedelta(seconds=exc.seconds)
     state["backoff_until"] = until.isoformat()
     state["backoff_reason"] = str(exc)
+    state["backoff_kind"] = kind
     log(f"BACKOFF: {exc}. Pausing Cinemark requests until {until.isoformat()}")
+
+
+def aggregate_scan_status(movies: dict) -> str:
+    statuses = [movie.get("status") for movie in movies.values()]
+    if statuses and all(status == "success" for status in statuses):
+        return "success"
+    if statuses and "failed" not in statuses and any(status == "backoff" for status in statuses):
+        return "backoff"
+    return "failed"
 
 
 def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
@@ -837,9 +863,18 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
         raise ScanError("At least one movie must be configured")
 
     if backoff_active(state):
-        result.update(status="backoff", backoff_until=state["backoff_until"])
+        result.update(
+            status="backoff",
+            backoff_until=state["backoff_until"],
+            backoff_kind=state.get("backoff_kind"),
+            backoff_reason=state.get("backoff_reason"),
+        )
         for movie in config["movies"]:
-            result["movies"][str(movie["movie_id"])] = {"status": "backoff"}
+            result["movies"][str(movie["movie_id"])] = {
+                "status": "backoff",
+                "backoff_kind": state.get("backoff_kind"),
+                "backoff_reason": state.get("backoff_reason"),
+            }
         result["finished_at"] = utcnow().isoformat()
         state["last_scan"] = result
         return result
@@ -913,12 +948,41 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
             state["movies"][mid] = movie_state
             state["outbox"].extend(staged_alerts)
             result["movies"][mid] = evidence
+        except SiteValidationError as exc:
+            backoff = CinemarkBackoff(
+                f"Cinemark site validation failed: {exc}",
+                configured_site_backoff_seconds(polling),
+            )
+            set_backoff(state, backoff, "site_validation")
+            for target in config["movies"]:
+                target_id = str(target["movie_id"])
+                result["movies"].setdefault(
+                    target_id,
+                    {
+                        "status": "backoff",
+                        "backoff_kind": "site_validation",
+                        "backoff_reason": str(backoff),
+                    },
+                )
+            result["backoff_until"] = state["backoff_until"]
+            result["backoff_kind"] = "site_validation"
+            result["backoff_reason"] = str(backoff)
+            break
         except CinemarkBackoff as exc:
             set_backoff(state, exc)
             for target in config["movies"]:
                 target_id = str(target["movie_id"])
-                result["movies"].setdefault(target_id, {"status": "backoff"})
+                result["movies"].setdefault(
+                    target_id,
+                    {
+                        "status": "backoff",
+                        "backoff_kind": state.get("backoff_kind"),
+                        "backoff_reason": state.get("backoff_reason"),
+                    },
+                )
             result["backoff_until"] = state["backoff_until"]
+            result["backoff_kind"] = state.get("backoff_kind")
+            result["backoff_reason"] = state.get("backoff_reason")
             break
         except Exception as exc:
             log(f"WARN: {movie_cfg['short_name']} scan failed: {exc}")
@@ -926,7 +990,7 @@ def run_once(config: dict, state: dict, dry_run: bool = False) -> dict:
             previous_state["last_attempt"] = evidence
             result["movies"][mid] = evidence
     result["finished_at"] = utcnow().isoformat()
-    result["status"] = "success" if all(m["status"] == "success" for m in result["movies"].values()) else "failed"
+    result["status"] = aggregate_scan_status(result["movies"])
     state["last_scan"] = result
     return result
 

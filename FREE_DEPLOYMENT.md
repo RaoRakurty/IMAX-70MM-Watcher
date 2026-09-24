@@ -84,6 +84,12 @@ persistence, plus timestamped movie observations such as:
 Those lines are illustrative only. Production output always uses actual scan
 times, ticket scope, seat counts, and ntfy acknowledgements.
 
+If Cinemark rate-limits, blocks, or serves page markup the watcher cannot trust,
+the workflow records `Watcher status: backoff` and continues quietly until the
+persisted cooldown expires. This suppresses repeated GitHub failure emails and
+avoids hammering Cinemark, but it is not ticket-availability proof; resume the
+24-hour clean-observation clock after validated `success` runs return.
+
 P1 stays open until all of the following pass:
 
 1. A manual ntfy test arrives on the phone.

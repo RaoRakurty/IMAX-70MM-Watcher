@@ -198,10 +198,13 @@ class ScanTests(unittest.TestCase):
     def test_backoff_does_not_fetch_or_succeed(self):
         s = state()
         s["backoff_until"] = (w.utcnow()+timedelta(hours=1)).isoformat()
+        s["backoff_kind"] = "site_validation"
+        s["backoff_reason"] = "Cinemark site validation failed: Theater calendar missing or ambiguous"
         with patch.object(w, "fetch") as fetch:
             result = w.run_once(config(), s)
         fetch.assert_not_called()
         self.assertEqual(result["status"], "backoff")
+        self.assertEqual(result["backoff_kind"], "site_validation")
 
     def test_429_backoff_persisted(self):
         s = state()
@@ -209,7 +212,27 @@ class ScanTests(unittest.TestCase):
             result = w.run_once(config(), s)
         self.assertEqual(fetch.call_count, 1)
         self.assertIn("backoff_until", s)
-        self.assertNotEqual(result["status"], "success")
+        self.assertEqual(result["status"], "backoff")
+        self.assertEqual(s["last_scan"]["status"], "backoff")
+
+    def test_site_validation_failure_enters_backoff(self):
+        s = state()
+        bad_calendar = listing().replace("ShowdatesList", "Changed")
+        with patch.object(w, "fetch", return_value=bad_calendar):
+            result = w.run_once(config(), s)
+        self.assertEqual(result["status"], "backoff")
+        self.assertEqual(result["backoff_kind"], "site_validation")
+        self.assertEqual(s["backoff_kind"], "site_validation")
+        self.assertIn("Theater calendar missing or ambiguous", s["backoff_reason"])
+        self.assertEqual(s["last_scan"]["status"], "backoff")
+
+    def test_config_errors_do_not_enter_site_backoff(self):
+        s = state()
+        cfg = config(False)
+        cfg["movies"][0]["monitoring_window_shift_days"] = 0
+        result = w.run_once(cfg, s)
+        self.assertEqual(result["status"], "failed")
+        self.assertNotIn("backoff_until", s)
 
     def test_alert_staged_not_sent_and_normal_dedup(self):
         s = state(two=False)
@@ -225,7 +248,7 @@ class ScanTests(unittest.TestCase):
         s = state(two=False)
         with patch.object(w, "fetch", side_effect=[listing(), "markup changed"]):
             result = w.run_once(config(False), s)
-        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["status"], "backoff")
         self.assertEqual(s["outbox"], [])
         self.assertEqual(s["movies"][ST.movie_id]["showtimes"], {})
 

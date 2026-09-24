@@ -12,9 +12,12 @@ required. See [FREE_DEPLOYMENT.md](FREE_DEPLOYMENT.md).
 ten-minute cadence fixed.** The earlier Google Cloud implementation remains in
 the repository as an optional alternative, documented in `DEPLOYMENT.md`.
 
-Failed, skipped/backoff, incomplete, or unparseable checks now exit nonzero.
-Health is sent only after validated observations for the configured movie and durable
-state/notification processing. Manual runs and ntfy tests never count as
+Failed, incomplete, or unparseable checks exit nonzero. Expected Cinemark
+backoff is the exception: HTTP 403/429 and current-page validation failures are
+persisted with a cooldown, skipped without making more Cinemark requests, and
+treated as operationally healthy by the workflow so GitHub does not email every
+ten minutes. Backoff is still labelled explicitly in state and run summaries; it
+is not ticket-availability proof. Manual runs and ntfy tests never count as
 scheduler proof. A signed HMAC binds each automatic run to its UTC ten-minute
 slot, and stale or forged dispatches fail before scanning.
 
@@ -103,6 +106,11 @@ appear in the GitHub run's **Summary** and logs, and in the cloud run record's
 not an assumed cron start. Dry runs, unpublished dates, and failed checks are
 labelled explicitly. Existing availability does not cause a new notification
 unless it meets the configured new-showtime/opening rules.
+
+When Cinemark returns rate limits, blocks, or markup that cannot be trusted, the
+watcher records a timed `backoff` instead of failing every scheduled run. The
+default page-validation cooldown is configured by
+`polling.site_error_backoff_seconds` in `config.json`.
 
 Cancellation/opening:
 
