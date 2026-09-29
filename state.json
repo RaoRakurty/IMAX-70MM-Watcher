@@ -7,7 +7,7 @@
     "backoff_kind": "site_validation",
     "backoff_reason": "Cinemark site validation failed: Theater calendar missing or ambiguous",
     "backoff_until": "2026-09-29T07:20:49.861885+00:00",
-    "finished_at": "2026-09-29T05:50:34.325032+00:00",
+    "finished_at": "2026-09-29T06:01:07.366291+00:00",
     "movies": {
       "109913": {
         "backoff_kind": "site_validation",
@@ -16,10 +16,10 @@
       }
     },
     "notifications_sent_by_movie": {},
-    "started_at": "2026-09-29T05:50:34.324889+00:00",
+    "started_at": "2026-09-29T06:01:07.366247+00:00",
     "status": "backoff",
     "status_lines": [
-      "2026-09-29 12:50:34 AM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
+      "2026-09-29 01:01:07 AM CDT \u2014 DUNE \u2014 CHECK SKIPPED: site backoff \u2014 no notification sent"
     ]
   },
   "movies": {
